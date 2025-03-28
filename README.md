@@ -158,7 +158,7 @@ To confirm delivery ,the customer must enter his password when the order is deli
 <br>
 Activity displaying the details of the developer and link to his social media handles.
 <br>
-<img src="![img.png](img.png).About%20Section.png" width=250 height=500 style="border-radius:5%">
+<img src="">
 <br>
 
 
