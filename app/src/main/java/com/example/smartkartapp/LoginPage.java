@@ -4,8 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,64 +22,72 @@ public class LoginPage extends AppCompatActivity {
     EditText phoneno, pass;
     Button login;
     TextView status;
-    String ph,pa;
-    static String tmpname;
-    //static DatabaseReference databaseCurrentUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
-        phoneno = (EditText) findViewById(R.id.logphone);
-        pass = (EditText) findViewById(R.id.logpass);
-        login = (Button) findViewById(R.id.btnlogin);
-        status=(TextView)findViewById(R.id.tvstatus);
+
+        phoneno = findViewById(R.id.logphone);
+        pass = findViewById(R.id.logpass);
+        login = findViewById(R.id.btnlogin);
+        status = findViewById(R.id.tvstatus);
         status.setText("");
-        //databaseCurrentUser= FirebaseDatabase.getInstance().getReference("getUserLogin");
+
+        RegisterPage.getuser(); // get database reference
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RegisterPage.getuser();
-                ph = phoneno.getText().toString();
-                pa = pass.getText().toString();
-                RegisterPage.databaseUsers.addValueEventListener(new ValueEventListener() {
+                String ph = phoneno.getText().toString().trim();
+                String pa = pass.getText().toString().trim();
+
+                // Basic input checks
+                if (TextUtils.isEmpty(ph) || TextUtils.isEmpty(pa)) {
+                    status.setText("Please enter both phone and password");
+                    return;
+                }
+
+                if (!ph.matches("^05\\d{8}$")) {
+                    status.setText("Phone must be 10 digits and start with 05");
+                    return;
+                }
+
+                // Check if phone exists in DB
+                RegisterPage.databaseUsers.child(ph).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        int x = 0;
-                        for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                            MemberReg memberReg = userSnapshot.getValue(MemberReg.class);
-                            String dpn = memberReg.getUsername();
-                            String dph = memberReg.getPhone();
-                            String dpa = memberReg.getPassword();
-                            if (dph.equals(ph) && dpa.equals(pa)) {
-                                /*{
-                                    String id=databaseCurrentUser.push().getKey();
-                                    GetUserLogin getUserLogin=new GetUserLogin(dpn,dph,id);
-                                    databaseCurrentUser.child(id).setValue(getUserLogin);
-                                }*/
-
-                                Intent i=new Intent(LoginPage.this,HomePageActivity.class);
-                                i.putExtra("NAME",dpn);
-                                i.putExtra("PHONE",dph);
-                                i.putExtra("PASSWORD",dpa);
-                                i.putExtra("CALLINGACTIVITY","LoginPage");
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            MemberReg memberReg = snapshot.getValue(MemberReg.class);
+                            if (memberReg.getPassword().equals(pa)) {
+                                // Successful login
+                                Intent i = new Intent(LoginPage.this, HomePageActivity.class);
+                                i.putExtra("NAME", memberReg.getUsername());
+                                i.putExtra("PHONE", memberReg.getPhone());
+                                i.putExtra("PASSWORD", memberReg.getPassword());
+                                i.putExtra("CALLINGACTIVITY", "LoginPage");
                                 startActivity(i);
-                                x = 1;
+                                finish(); // Prevent back to login
+                            } else {
+                                status.setText("Incorrect password");
                             }
+                        } else {
+                            status.setText("Phone number not registered");
                         }
-                        if (x == 0)
-                            status.setText("Invalid Credentials");
                     }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                        }
-                   });
-
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(LoginPage.this, "Database error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }
-   public void onBackPressed(){
-       startActivity(new Intent(LoginPage.this,RegLogChoice.class));
-   }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(LoginPage.this, RegLogChoice.class));
+        finish();
+    }
 }
