@@ -61,8 +61,7 @@
 13. BOOKS, 
 14. ELECTRONICS, 
 15. OTHER ITEMS, 
-16. CLOTHING
-:
+16. CLOTHING:
    <br>
    Activities for displaying items or subdivisions within the category of respective Activity name.
    <br>
