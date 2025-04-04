@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "440691657015",
+    "firebase_url": "https://smartkart-app-23ab8-default-rtdb.firebaseio.com",
+    "project_id": "smartkart-app-23ab8",
+    "storage_bucket": "smartkart-app-23ab8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:440691657015:android:b44fdec02f116a80b232b2",
+        "android_client_info": {
+          "package_name": "com.example.smartkartapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9T-TKcqZZBtPYxkp54BpQomK3X0qsQw0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
