@@ -1,7 +1,7 @@
 <h1 align="center">🛒 Shopping-Ecommerce-App-Project</h1>
 <h3 align="center">An Online Ecommerce App built using Android Studio and Firebase Realtime Database</h3>
 <p align="center">
-  <img src="https://github.com/KaramHendi/Shopping-Ecommerce-App-Project/blob/master/App%20Screenshots/logo.png?raw=true" width="150"/>
+  <img src="https://github.com/KaramHendi/Shopping-Ecommerce-App-Project/blob/main/App%20Screenshots/logo.png" width="150"/>
 </p>
 
 <p align="center">
