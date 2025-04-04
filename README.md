@@ -52,7 +52,16 @@
    <br>
    <img src="https://raw.githubusercontent.com/KaramHendi/Shopping-Ecommerce-App-Project/master/App%20Screenshots/04.User%20Home%20Screen.png" width=250 height=500 style="border-radius:5%">
    <br>
-7. MENS CLOTHING, 8. WOMENS CLOTHING, 9. TSHIRTS, 10. BOTTOM WEAR, 11. SHOES, 12. FORMALS, 13. BOOKS, 14. ELECTRONICS, 15. OTHER ITEMS, 16. CLOTHING:
+7. MENS CLOTHING, 
+8. WOMENS CLOTHING, 
+9. TSHIRTS, 
+10. BOTTOM WEAR, 
+11. SHOES, 
+12. FORMALS, 
+13. BOOKS, 
+14. ELECTRONICS, 
+15. OTHER ITEMS, 
+16. CLOTHING:
    <br>
    Activities for displaying items or subdivisions within the category of respective Activity name.
    <br>
