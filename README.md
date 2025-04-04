@@ -143,7 +143,7 @@
     <br>
     Activity displaying the details of the developer and link to his social media handles.
     <br>
-    <img src="https://github.com/KaramHendi/Shopping-Ecommerce-App-Project/blob/KaramHendi-patch-1/img.png" width=250 height=500 style="border-radius:5%">
+    <img src="https://github.com/KaramHendi/Shopping-Ecommerce-App-Project/blob/main/App%20Screenshots/img.png" width=250 height=500 style="border-radius:5%">
     <br>
 
 <h3 align="center">Loved this project?? If yes, don't forget to give it a ⭐ and share it with your friends 😃</h3>
