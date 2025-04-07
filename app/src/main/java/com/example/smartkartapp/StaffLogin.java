@@ -63,7 +63,7 @@ public class StaffLogin extends AppCompatActivity {
                         }
 
                         if (!found) {
-                            stfstatus.setText("Invalid Credentials");
+                            stfstatus.setText("Invalid Credentials or Phone number mismatch");
                         }
                     }
 

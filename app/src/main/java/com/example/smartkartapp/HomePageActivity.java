@@ -35,9 +35,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class HomePageActivity extends AppCompatActivity {
-Button clothing,electronics,books,otherItems;
+    Button clothing, electronics, books, otherItems;
     private AppBarConfiguration mAppBarConfiguration;
     static DatabaseReference databaseOrders;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,8 +55,7 @@ Button clothing,electronics,books,otherItems;
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home)
                 .setDrawerLayout(drawer)
@@ -63,61 +63,69 @@ Button clothing,electronics,books,otherItems;
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-        clothing=findViewById(R.id.clothing);
-        electronics=findViewById(R.id.electronics);
-        books=findViewById(R.id.books);
-        otherItems=findViewById(R.id.otherItems);
-        final String sna=getIntent().getStringExtra("NAME");
-        final String sph=getIntent().getStringExtra("PHONE");
-        final String spa=getIntent().getStringExtra("PASSWORD");
-        final String ca=getIntent().getStringExtra("CALLINGACTIVITY");
-        if(ca.equals("LoginPage"))
-            Toast.makeText(this,"Hello ,"+sna+"!",Toast.LENGTH_SHORT).show();
-        else if(ca.equals("PlaceOrder"))
-            Toast.makeText(this,"Order Placed Successfully!",Toast.LENGTH_LONG).show();
+
+        clothing = findViewById(R.id.clothing);
+        electronics = findViewById(R.id.electronics);
+        books = findViewById(R.id.books);
+        otherItems = findViewById(R.id.otherItems);
+
+        final String sna = getIntent().getStringExtra("NAME");
+        final String sph = getIntent().getStringExtra("PHONE");
+        final String spa = getIntent().getStringExtra("PASSWORD");
+        final String callingActivity = getIntent().getStringExtra("CALLINGACTIVITY"); // Retrieve the calling activity extra
+
+        // Check if the calling activity is "RegisterPage"
+        if ("RegisterPage".equals(callingActivity)) {
+            Toast.makeText(this, "Welcome from RegisterPage", Toast.LENGTH_SHORT).show();
+        } else if ("PlaceOrder".equals(callingActivity)) {
+            Toast.makeText(this, "Order Placed Successfully!", Toast.LENGTH_LONG).show();
+        } else if ("LoginPage".equals(callingActivity)) {
+            Toast.makeText(this, "Hello, " + sna + "!", Toast.LENGTH_SHORT).show();
+        }
+
         clothing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(HomePageActivity.this,Clothing.class);
-                intent.putExtra("NAME",sna);
-                intent.putExtra("PHONE",sph);
-                intent.putExtra("PASSWORD",spa);
+                Intent intent = new Intent(HomePageActivity.this, Clothing.class);
+                intent.putExtra("NAME", sna);
+                intent.putExtra("PHONE", sph);
+                intent.putExtra("PASSWORD", spa);
                 startActivity(intent);
             }
         });
         electronics.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(HomePageActivity.this,Electronics.class);
-                intent.putExtra("NAME",sna);
-                intent.putExtra("PHONE",sph);
-                intent.putExtra("PASSWORD",spa);
+                Intent intent = new Intent(HomePageActivity.this, Electronics.class);
+                intent.putExtra("NAME", sna);
+                intent.putExtra("PHONE", sph);
+                intent.putExtra("PASSWORD", spa);
                 startActivity(intent);
             }
         });
         books.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(HomePageActivity.this,Books.class);
-                intent.putExtra("NAME",sna);
-                intent.putExtra("PHONE",sph);
-                intent.putExtra("PASSWORD",spa);
+                Intent intent = new Intent(HomePageActivity.this, Books.class);
+                intent.putExtra("NAME", sna);
+                intent.putExtra("PHONE", sph);
+                intent.putExtra("PASSWORD", spa);
                 startActivity(intent);
             }
         });
         otherItems.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(HomePageActivity.this,OtherItems.class);
-                intent.putExtra("NAME",sna);
-                intent.putExtra("PHONE",sph);
-                intent.putExtra("PASSWORD",spa);
+                Intent intent = new Intent(HomePageActivity.this, OtherItems.class);
+                intent.putExtra("NAME", sna);
+                intent.putExtra("PHONE", sph);
+                intent.putExtra("PASSWORD", spa);
                 startActivity(intent);
             }
         });
-        databaseOrders=FirebaseDatabase.getInstance().getReference("orders");
-    }
 
+        databaseOrders = FirebaseDatabase.getInstance().getReference("orders");
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -132,10 +140,13 @@ Button clothing,electronics,books,otherItems;
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
-    public void onBackPressed(){
-        startActivity(new Intent(HomePageActivity.this,LoginPage.class));
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(HomePageActivity.this, LoginPage.class));
     }
-    public static void getOrder(){
-        databaseOrders=FirebaseDatabase.getInstance().getReference("orders");
+
+    public static void getOrder() {
+        databaseOrders = FirebaseDatabase.getInstance().getReference("orders");
     }
 }
