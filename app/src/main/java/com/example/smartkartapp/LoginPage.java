@@ -66,7 +66,7 @@ public class LoginPage extends AppCompatActivity {
                             public void onDataChange(DataSnapshot snapshot) {
                                 String role = snapshot.getValue(String.class);
                                 if (role != null) {
-                                    // Pass the role to RegLogChoice Activity
+                                    // Pass the role to HomePageActivity
                                     Intent intent = new Intent(LoginPage.this, HomePageActivity.class);
                                     intent.putExtra("USER_ROLE", role);  // Pass role here
                                     startActivity(intent);

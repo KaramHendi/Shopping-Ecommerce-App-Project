@@ -7,6 +7,7 @@
     tools:context=".AddStaff"
     android:background="@drawable/staffpage">
 
+    <!-- Staff Name Input -->
     <EditText
         android:id="@+id/reg_staff_name"
         android:layout_width="wrap_content"
@@ -23,6 +24,7 @@
         app:layout_constraintVertical_bias="0.10"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <!-- Staff Phone Number Input -->
     <EditText
         android:id="@+id/reg_staff_phone"
         android:layout_width="wrap_content"
@@ -39,6 +41,7 @@
         app:layout_constraintVertical_bias="0.25"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <!-- Staff Password Input -->
     <EditText
         android:id="@+id/reg_staff_pass"
         android:layout_width="wrap_content"
@@ -55,6 +58,7 @@
         app:layout_constraintVertical_bias="0.40"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <!-- Confirm Password Input -->
     <EditText
         android:id="@+id/reg_staff_repass"
         android:layout_width="wrap_content"
@@ -71,6 +75,7 @@
         app:layout_constraintVertical_bias="0.63"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <!-- Register Button -->
     <Button
         android:id="@+id/btn_reg_staff"
         android:layout_width="360dp"

@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class HomePageActivity extends AppCompatActivity {
     Button clothing, electronics, books, otherItems;
+    String userRole;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,15 +22,26 @@ public class HomePageActivity extends AppCompatActivity {
         books = findViewById(R.id.books);
         otherItems = findViewById(R.id.otherItems);
 
-        final String sna = getIntent().getStringExtra("NAME");
-        final String sph = getIntent().getStringExtra("PHONE");
-        final String spa = getIntent().getStringExtra("PASSWORD");
-        final String callingActivity = getIntent().getStringExtra("CALLINGACTIVITY");
+        // Get the role passed from the login activity
+        userRole = getIntent().getStringExtra("USER_ROLE");
 
-        if ("RegisterPage".equals(callingActivity)) {
-            Toast.makeText(this, "Welcome", Toast.LENGTH_SHORT).show();
-        } else if ("LoginPage".equals(callingActivity)) {
-            Toast.makeText(this, "Hello, " + sna + "!", Toast.LENGTH_SHORT).show();
+        // Handle different roles
+        if (userRole != null) {
+            if (userRole.equals("admin")) {
+                // Admin has full access, show admin-related features
+                Toast.makeText(this, "Welcome Admin", Toast.LENGTH_SHORT).show();
+                // Additional setup for admin features if needed
+            } else if (userRole.equals("staff")) {
+                // Staff has limited access
+                Toast.makeText(this, "Welcome Staff", Toast.LENGTH_SHORT).show();
+                // You can limit staff access here by hiding/showing specific views
+            } else if (userRole.equals("user")) {
+                // Regular users have access to general features
+                Toast.makeText(this, "Welcome User", Toast.LENGTH_SHORT).show();
+                // Setup for user interface
+            }
+        } else {
+            Toast.makeText(this, "Role not found", Toast.LENGTH_SHORT).show();
         }
 
         clothing.setOnClickListener(v -> navigateToCategoryActivity(Clothing.class));
@@ -40,9 +52,7 @@ public class HomePageActivity extends AppCompatActivity {
 
     private void navigateToCategoryActivity(Class<?> targetActivity) {
         Intent intent = new Intent(HomePageActivity.this, targetActivity);
-        intent.putExtra("NAME", getIntent().getStringExtra("NAME"));
-        intent.putExtra("PHONE", getIntent().getStringExtra("PHONE"));
-        intent.putExtra("PASSWORD", getIntent().getStringExtra("PASSWORD"));
+        intent.putExtra("USER_ROLE", userRole);  // Pass role again if needed
         startActivity(intent);
     }
 

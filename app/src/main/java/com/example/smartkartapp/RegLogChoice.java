@@ -13,8 +13,8 @@ import com.google.firebase.database.*;
 
 public class RegLogChoice extends AppCompatActivity {
     Button reg, log, logout;
-     TextView admlog;
-     TextView stflog;
+    TextView admlog;
+    TextView stflog;
     TextView about;
     FirebaseAuth mAuth;
     DatabaseReference mDatabase;
@@ -54,9 +54,6 @@ public class RegLogChoice extends AppCompatActivity {
         admlog.setOnClickListener(v -> startActivity(new Intent(this, AdminLogin.class)));
         stflog.setOnClickListener(v -> startActivity(new Intent(this, StaffLogin.class)));
         about.setOnClickListener(v -> startActivity(new Intent(this, About.class)));
-
-
-        ;
     }
 
     private void checkUserRole() {
