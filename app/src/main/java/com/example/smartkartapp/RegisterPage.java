@@ -11,8 +11,11 @@ import android.widget.Toast;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class RegisterPage extends AppCompatActivity {
     EditText etname, etphone, etpass;
@@ -21,7 +24,7 @@ public class RegisterPage extends AppCompatActivity {
     static DatabaseReference databaseUsers;
 
     public static void getuser() {
-        databaseUsers = FirebaseDatabase.getInstance().getReference("memberReg");
+        databaseUsers = FirebaseDatabase.getInstance().getReference("users");
     }
 
     @Override
@@ -35,7 +38,7 @@ public class RegisterPage extends AppCompatActivity {
         register = findViewById(R.id.btnregister);
 
         mAuth = FirebaseAuth.getInstance();
-        databaseUsers = FirebaseDatabase.getInstance().getReference("memberReg");
+        databaseUsers = FirebaseDatabase.getInstance().getReference("users");
 
         register.setOnClickListener(v -> registerUser());
     }
@@ -65,7 +68,7 @@ public class RegisterPage extends AppCompatActivity {
         if (name.equals("smartkart") && phone.equals("0587654321") && password.equals("appadmin123")) {
             role = "admin";
         } else {
-            // Check if phone is in a list of staff numbers (Example logic)
+            // Check if phone is in the list of staff numbers from the database
             if (isStaffPhoneNumber(phone)) {
                 role = "staff";
             } else {
@@ -107,14 +110,25 @@ public class RegisterPage extends AppCompatActivity {
     }
 
     // Helper method to check if the phone number belongs to staff
-    private boolean isStaffPhoneNumber(String phone) {
-        // You could check against a list of staff phone numbers or other criteria
-        String[] staffPhoneNumbers = {};
-        for (String staffPhone : staffPhoneNumbers) {
-            if (phone.equals(staffPhone)) {
-                return true;
+    private boolean isStaffPhoneNumber(final String phone) {
+        final boolean[] isStaff = {false}; // Using an array to hold value from the async query
+
+        // Query the Firebase database for users with the same phone number
+        databaseUsers.orderByChild("phone").equalTo(phone).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    isStaff[0] = true; // If the phone number exists, it's a staff number
+                }
             }
-        }
-        return false;
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(RegisterPage.this, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Return the result after the Firebase query completes
+        return isStaff[0];
     }
 }

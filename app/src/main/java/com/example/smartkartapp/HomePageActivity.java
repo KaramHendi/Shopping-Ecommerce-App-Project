@@ -48,6 +48,6 @@ public class HomePageActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        startActivity(new Intent(HomePageActivity.this, LoginPage.class));
+        startActivity(new Intent(HomePageActivity.this, RegLogChoice.class));
     }
 }
