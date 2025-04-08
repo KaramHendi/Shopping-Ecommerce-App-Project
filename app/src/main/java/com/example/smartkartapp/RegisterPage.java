@@ -4,8 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -63,10 +61,17 @@ public class RegisterPage extends AppCompatActivity {
             return;
         }
 
+        // Check if the user is admin
         if (name.equals("smartkart") && phone.equals("0587654321") && password.equals("appadmin123")) {
             role = "admin";
         } else {
-            role = "staff";
+            // Check if phone is in a list of staff numbers (Example logic)
+            if (isStaffPhoneNumber(phone)) {
+                role = "staff";
+            } else {
+                // Default role for all others is "user"
+                role = "user";
+            }
         }
 
         register.setEnabled(false);
@@ -79,20 +84,37 @@ public class RegisterPage extends AppCompatActivity {
                         if (user != null) {
                             String uid = user.getUid();
                             MemberReg member = new MemberReg(phone, name, password, phone, role);
-                            databaseUsers.child(uid).setValue(member);
+                            databaseUsers.child(uid).setValue(member)
+                                    .addOnCompleteListener(dbTask -> {
+                                        if (dbTask.isSuccessful()) {
+                                            Toast.makeText(this, "Registered as " + role, Toast.LENGTH_SHORT).show();
 
-                            Toast.makeText(this, "Registered as " + role, Toast.LENGTH_SHORT).show();
-
-                            Intent intent = new Intent(RegisterPage.this, HomePageActivity.class);
-                            intent.putExtra("userPhone", phone);
-                            intent.putExtra("userRole", role);
-                            intent.putExtra("CALLINGACTIVITY", "RegisterPage");
-                            startActivity(intent);
-                            finish();
+                                            Intent intent = new Intent(RegisterPage.this, HomePageActivity.class);
+                                            intent.putExtra("userPhone", phone);
+                                            intent.putExtra("userRole", role);
+                                            intent.putExtra("CALLINGACTIVITY", "RegisterPage");
+                                            startActivity(intent);
+                                            finish();
+                                        } else {
+                                            Toast.makeText(this, "Failed to store user data: " + dbTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                         }
                     } else {
                         Toast.makeText(this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    // Helper method to check if the phone number belongs to staff
+    private boolean isStaffPhoneNumber(String phone) {
+        // You could check against a list of staff phone numbers or other criteria
+        String[] staffPhoneNumbers = {};
+        for (String staffPhone : staffPhoneNumbers) {
+            if (phone.equals(staffPhone)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

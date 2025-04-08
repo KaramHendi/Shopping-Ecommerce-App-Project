@@ -4,20 +4,19 @@ public class MemberReg {
 
     String id, username, password, phone, role;
 
-    // Default constructor
     public MemberReg() {
     }
 
-    // Parameterized constructor
+    // Constructor modified to accept String for role
     public MemberReg(String id, String username, String password, String phone, String role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.phone = phone;
-        this.role = role;  // Set the role field
+        this.role = role;
     }
 
-    // Getters and Setters for all fields
+    // Getters and Setters
     public String getUsername() {
         return username;
     }
@@ -40,14 +39,6 @@ public class MemberReg {
 
     public void setPhone(String phone) {
         this.phone = phone;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getRole() {

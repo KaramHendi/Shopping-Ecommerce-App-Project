@@ -14,11 +14,11 @@ import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class LoginPage extends AppCompatActivity {
+
     EditText phoneno, pass;
     Button login;
     TextView status;
@@ -34,15 +34,12 @@ public class LoginPage extends AppCompatActivity {
         status = findViewById(R.id.tvstatus);
         status.setText("");
 
-        RegisterPage.getuser(); // get database reference
-
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String ph = phoneno.getText().toString().trim();
                 String pa = pass.getText().toString().trim();
 
-                // Basic input checks
                 if (TextUtils.isEmpty(ph) || TextUtils.isEmpty(pa)) {
                     status.setText("Please enter both phone and password");
                     return;
@@ -53,34 +50,38 @@ public class LoginPage extends AppCompatActivity {
                     return;
                 }
 
-                // Check if phone exists in DB
-                RegisterPage.databaseUsers.child(ph).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            MemberReg memberReg = snapshot.getValue(MemberReg.class);
-                            if (memberReg.getPassword().equals(pa)) {
-                                // Successful login
-                                Intent i = new Intent(LoginPage.this, HomePageActivity.class);
-                                i.putExtra("NAME", memberReg.getUsername());
-                                i.putExtra("PHONE", memberReg.getPhone());
-                                i.putExtra("PASSWORD", memberReg.getPassword());
-                                i.putExtra("CALLINGACTIVITY", "LoginPage");
-                                startActivity(i);
-                                finish(); // Prevent back to login
-                            } else {
-                                status.setText("Incorrect password");
-                            }
-                        } else {
-                            status.setText("Phone number not registered");
-                        }
-                    }
+                FirebaseDatabase.getInstance().getReference("users")
+                        .orderByChild("phone")
+                        .equalTo(ph)
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.exists()) {
+                                    for (DataSnapshot userSnap : snapshot.getChildren()) {
+                                        MemberReg user = userSnap.getValue(MemberReg.class);
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(LoginPage.this, "Database error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                                        if (user != null && user.getPassword().equals(pa)) {
+                                            Intent i = new Intent(LoginPage.this, HomePageActivity.class);
+                                            i.putExtra("USER_ROLE", user.getRole());
+                                            i.putExtra("NAME", user.getUsername());
+                                            i.putExtra("PHONE", user.getPhone());
+                                            i.putExtra("PASSWORD", user.getPassword());
+                                            startActivity(i);
+                                            finish();
+                                        } else {
+                                            status.setText("Incorrect password");
+                                        }
+                                    }
+                                } else {
+                                    status.setText("Phone number not registered");
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Toast.makeText(LoginPage.this, "Database error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         });
     }
