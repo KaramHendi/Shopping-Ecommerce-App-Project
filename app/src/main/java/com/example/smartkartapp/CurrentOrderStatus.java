@@ -2,7 +2,6 @@ package com.example.smartkartapp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -80,30 +79,24 @@ public class CurrentOrderStatus extends AppCompatActivity {
 
     public void checkDeliveryConfirmation() {
         if (TextUtils.isEmpty(custPass.getText().toString())) {
-            Toast.makeText(this, "Please enter the customer's password", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please enter the OTP", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Fetch user data for password validation
-        RegisterPage.getuser();
-        RegisterPage.databaseUsers.addValueEventListener(new ValueEventListener() {
+        // Fetch ongoing delivery orders to get OTP
+        AcceptOrders.databaseOngoingDelivery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                    MemberReg memberReg = userSnapshot.getValue(MemberReg.class);
-                    if (memberReg != null) {
-                        final String name = memberReg.getUsername();
-                        final String phone = memberReg.getPhone();
-                        final String password = memberReg.getPassword();
+                for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
+                    DeliverOrder deliverOrder = orderSnapshot.getValue(DeliverOrder.class);
+                    if (deliverOrder != null && deliverOrder.getName().equals(custName.getText().toString())
+                            && deliverOrder.getPhone().equals(custPhone.getText().toString())) {
 
-                        // Check if the entered customer name and phone match
-                        if (name.equals(custName.getText().toString()) && phone.equals(custPhone.getText().toString())) {
-                            if (password.equals(custPass.getText().toString())) {
-                                // Password matches, now confirm delivery
-                                completeDelivery(name, phone);
-                            } else {
-                                showError();
-                            }
+                        // Check if the entered OTP matches
+                        if (custPass.getText().toString().equals(deliverOrder.getOtp())) {
+                            completeDelivery(deliverOrder);
+                        } else {
+                            showError();
                         }
                     }
                 }
@@ -111,40 +104,21 @@ public class CurrentOrderStatus extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle any errors while fetching data
+                // Handle errors while fetching data
             }
         });
     }
 
-    private void completeDelivery(final String name, final String phone) {
-        // Get the ongoing delivery orders
-        AcceptOrders.databaseOngoingDelivery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
-                    DeliverOrder deliverOrder = orderSnapshot.getValue(DeliverOrder.class);
-                    if (deliverOrder != null && name.equals(deliverOrder.getName()) && phone.equals(deliverOrder.getPhone())
-                            && orderDet.getText().toString().equals(deliverOrder.getOrderDetails())) {
+    private void completeDelivery(DeliverOrder deliverOrder) {
+        // Remove the order from the database after delivery confirmation
+        AcceptOrders.databaseOngoingDelivery.child(deliverOrder.getId()).removeValue();
 
-                        // Remove the order from the database after delivery confirmation
-                        orderSnapshot.getRef().removeValue();
+        // Show success message
+        showSuccess();
 
-                        // Show success message
-                        showSuccess();
-
-                        // Reset fields and navigate to AcceptOrders screen
-                        resetFields();
-                        navigateToAcceptOrders();
-                        break;
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle errors while processing data
-            }
-        });
+        // Reset fields and navigate to AcceptOrders screen
+        resetFields();
+        navigateToAcceptOrders();
     }
 
     private void resetFields() {
@@ -171,19 +145,12 @@ public class CurrentOrderStatus extends AppCompatActivity {
     }
 
     public void showError() {
-        Toast.makeText(this, "Incorrect Password", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Incorrect OTP", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onBackPressed() {
         // Prevent user from going back without confirming delivery
         Toast.makeText(this, "Please deliver this order before you log out", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Kill the process to clean up resources
-        android.os.Process.killProcess(android.os.Process.myPid());
     }
 }
