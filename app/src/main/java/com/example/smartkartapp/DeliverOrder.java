@@ -1,12 +1,12 @@
 package com.example.smartkartapp;
 
 public class DeliverOrder {
-    String name, phone, id, address, orderDetails, deliveryStaffName, price, otp, status;
+    String name, phone, id, address, orderDetails, deliveryStaffName, price, status;
 
     // Default constructor
     public DeliverOrder() {}
 
-    // Constructor with all fields
+    // Constructor with all fields including status
     public DeliverOrder(String name, String phone, String id, String address, String orderDetails,
                         String deliveryStaffName, String price, String status) {
         this.name = name;
@@ -16,7 +16,7 @@ public class DeliverOrder {
         this.orderDetails = orderDetails;
         this.deliveryStaffName = deliveryStaffName;
         this.price = price;
-        this.status = status; // e.g., "Awaiting Customer Confirmation"
+        this.status = status; // e.g., "Pending", "Delivered", etc.
     }
 
     // Getters and Setters

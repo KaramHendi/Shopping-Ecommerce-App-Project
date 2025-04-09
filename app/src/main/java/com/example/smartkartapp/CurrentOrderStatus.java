@@ -1,10 +1,9 @@
 package com.example.smartkartapp;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,8 +18,7 @@ import com.google.firebase.database.ValueEventListener;
 public class CurrentOrderStatus extends AppCompatActivity {
 
     TextView custName, custAddr, custPhone, orderDet, orderPrice;
-    EditText custPass;
-    Button confirmDelivery, orderDeliveredButton;
+    Button confirmDelivery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,10 +30,8 @@ public class CurrentOrderStatus extends AppCompatActivity {
         custPhone = findViewById(R.id.tvCustPhone);
         custAddr = findViewById(R.id.tvCustAddr);
         orderDet = findViewById(R.id.tvdet);
-        orderPrice = findViewById(R.id.tvItemPrice);
+        orderPrice = findViewById(R.id.tvItemPrice);  // Make sure this matches the ID in your XML
         confirmDelivery = findViewById(R.id.confirmDelivery);
-        custPass = findViewById(R.id.tvCustPass);
-        orderDeliveredButton = findViewById(R.id.orderDeliveredButton);  // New button for "Order Delivered"
 
         // Get staff name from intent
         final String staffname = getIntent().getStringExtra("STAFFNAME");
@@ -63,44 +59,13 @@ public class CurrentOrderStatus extends AppCompatActivity {
             }
         });
 
-        // Handle confirm delivery button click (sets status to "Awaiting Customer Confirmation")
+        // Handle confirm delivery button click (sets status to "Delivered")
         confirmDelivery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateOrderStatusToAwaitingCustomerConfirmation(staffname);
-            }
-        });
-
-        // Handle "Order Delivered" button click (sets status to "Delivered")
-        orderDeliveredButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateOrderStatusToDelivered(staffname);
             }
         });
-    }
-
-    public void updateOrderStatusToAwaitingCustomerConfirmation(String staffname) {
-        // Update the order status to "Awaiting Customer Confirmation"
-        FirebaseDatabase.getInstance().getReference("Orders").orderByChild("deliveryStaffName").equalTo(staffname)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
-                            String orderId = orderSnapshot.getKey();
-                            FirebaseDatabase.getInstance().getReference("Orders").child(orderId)
-                                    .child("status").setValue("Awaiting Customer Confirmation");
-
-                            // Send notification to customer
-                            sendCustomerNotification(orderId, "Awaiting Customer Confirmation");
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        // Handle errors if any
-                    }
-                });
     }
 
     public void updateOrderStatusToDelivered(String staffname) {
@@ -114,8 +79,8 @@ public class CurrentOrderStatus extends AppCompatActivity {
                             FirebaseDatabase.getInstance().getReference("Orders").child(orderId)
                                     .child("status").setValue("Delivered");
 
-                            // Send notification to customer
-                            sendCustomerNotification(orderId, "Delivered");
+                            // Send message to customer asking if they picked up the order
+                            sendCustomerConfirmationMessage(orderId);
                         }
                     }
 
@@ -126,8 +91,13 @@ public class CurrentOrderStatus extends AppCompatActivity {
                 });
     }
 
-    private void sendCustomerNotification(String orderId, String status) {
-        // Send a notification to the customer (simulated via a toast for simplicity)
-        Toast.makeText(this, "Notification sent to the customer: Order " + status, Toast.LENGTH_SHORT).show();
+    private void sendCustomerConfirmationMessage(String orderId) {
+        // Simulate sending a message to the customer
+        Toast.makeText(this, "Notification sent to customer: Did you pick up the order?", Toast.LENGTH_SHORT).show();
+
+        // Go to CustomerOrderConfirmation activity for customer response
+        Intent intent = new Intent(this, CustomerOrderConfirmation.class);
+        intent.putExtra("ORDER_ID", orderId);  // Pass the order ID to the next activity
+        startActivity(intent);
     }
 }

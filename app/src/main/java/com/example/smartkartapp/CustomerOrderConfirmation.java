@@ -1,82 +1,70 @@
 package com.example.smartkartapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class CustomerOrderConfirmation extends AppCompatActivity {
 
-    TextView orderDetails, orderPrice;
-    Button orderPickedButton;
+    private Button orderPickedUpButton, orderNotPickedUpButton;
+    private String orderId; // Pass this from previous activity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_customer_order_confirmation);
+        setContentView(R.layout.activity_customer_order_confirmation); // Ensure this is your correct XML layout
 
-        // Initialize UI components
-        orderDetails = findViewById(R.id.tvOrderDetails);
-        orderPrice = findViewById(R.id.tvOrderPrice);
-        orderPickedButton = findViewById(R.id.orderPickedButton);
+        orderPickedUpButton = findViewById(R.id.orderPickedUpButton);
+        orderNotPickedUpButton = findViewById(R.id.orderNotPickedUpButton);
 
-        // Get order ID from intent
-        final String orderId = getIntent().getStringExtra("ORDERID");
+        // Get the order ID passed from previous activity
+        orderId = getIntent().getStringExtra("ORDERID");
 
-        // Check if the orderId is valid
-        if (orderId == null || orderId.isEmpty()) {
-            Toast.makeText(this, "Invalid order ID", Toast.LENGTH_SHORT).show();
-            finish(); // Exit the activity if no valid order ID is passed
-            return;
-        }
-
-        // Fetch order details for the customer
-        FirebaseDatabase.getInstance().getReference("Orders").child(orderId).addListenerForSingleValueEvent(new ValueEventListener() {
+        // Set listeners for the buttons
+        orderPickedUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    DeliverOrder deliverOrder = dataSnapshot.getValue(DeliverOrder.class);
-                    if (deliverOrder != null) {
-                        orderDetails.setText(deliverOrder.getOrderDetails());
-                        orderPrice.setText(deliverOrder.getPrice());
-                    }
-                } else {
-                    Toast.makeText(CustomerOrderConfirmation.this, "Order not found.", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle errors if any
-                Toast.makeText(CustomerOrderConfirmation.this, "Error fetching order details.", Toast.LENGTH_SHORT).show();
+            public void onClick(View v) {
+                updateOrderStatus(true); // Order picked up
             }
         });
 
-        // Handle order pickup confirmation button click
-        orderPickedButton.setOnClickListener(v -> confirmOrderPicked(orderId));
+        orderNotPickedUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateOrderStatus(false); // Order not picked up
+            }
+        });
     }
 
-    public void confirmOrderPicked(String orderId) {
-        // Update the order status to "Picked Up"
-        FirebaseDatabase.getInstance().getReference("Orders").child(orderId)
-                .child("status").setValue("Picked Up")
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        // Notify the customer about the status update
-                        Toast.makeText(CustomerOrderConfirmation.this, "Order picked up! Thank you.", Toast.LENGTH_SHORT).show();
-                    } else {
-                        // Handle errors if updating the status fails
-                        Toast.makeText(CustomerOrderConfirmation.this, "Failed to update the order status.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+    private void updateOrderStatus(boolean isPickedUp) {
+        DatabaseReference databaseOrderRef = FirebaseDatabase.getInstance().getReference("deliverOrder").child(orderId);
+
+        if (isPickedUp) {
+            // Update status to "Order picked up"
+            databaseOrderRef.child("status").setValue("Order picked up successfully");
+
+            // Send message to customer confirming the pickup (you can add your custom logic here)
+            Toast.makeText(CustomerOrderConfirmation.this, "Order status updated: Picked up successfully.", Toast.LENGTH_SHORT).show();
+        } else {
+            // Set order status back to "Pending"
+            databaseOrderRef.child("status").setValue("Pending");
+
+            // Send message to customer confirming that the order is still pending
+            Toast.makeText(CustomerOrderConfirmation.this, "Order status updated: Pending again.", Toast.LENGTH_SHORT).show();
+        }
+
+        // You may navigate back to a different screen after updating the order status
+        finish(); // Close the current activity
     }
 }

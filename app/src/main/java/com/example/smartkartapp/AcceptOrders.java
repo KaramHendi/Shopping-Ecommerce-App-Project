@@ -20,11 +20,16 @@ public class AcceptOrders extends AppCompatActivity {
     TextView tv1, tv2, tv3, tv4, tvtopmsg;
     static DatabaseReference databaseOngoingDelivery;
 
+    public static void getDelivery() {
+        databaseOngoingDelivery = FirebaseDatabase.getInstance().getReference("deliverOrder");
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accept_orders);
 
+        // Initialize the TextViews
         tv1 = findViewById(R.id.tv1);
         tv2 = findViewById(R.id.tv2);
         tv3 = findViewById(R.id.tv3);
@@ -42,6 +47,7 @@ public class AcceptOrders extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int i = 0;
+                // Loop through each order and display up to 4 ongoing orders
                 for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
                     i++;
                     Orders orders = orderSnapshot.getValue(Orders.class);
@@ -51,6 +57,8 @@ public class AcceptOrders extends AppCompatActivity {
                     String specs = orders.getSpec();
                     int price = orders.getPrice();
                     String details = "NAME:" + name + "\nPHONE:" + phone + "\nADDRESS:" + address + "\nORDER DETAILS:" + specs + "\nPRICE:" + price;
+
+                    // Set the TextViews with the order details
                     switch (i) {
                         case 1:
                             tv1.setText(details);
@@ -71,61 +79,41 @@ public class AcceptOrders extends AppCompatActivity {
                             tv4.setText(details);
                             break;
                     }
-                    if (i > 0)
+                    if (i > 0) {
                         tvtopmsg.setText("Tap on an order to start its delivery");
+                    }
                 }
-                if (i == 0)
-                    tv1.setText("");
-                if (tv1.getText().equals(""))
+                // No ongoing orders message
+                if (i == 0) {
                     tvtopmsg.setText("There are no ongoing orders");
+                    tv1.setText("");
+                }
 
-                tv1.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (!tv1.getText().toString().equals("")) {
-                            String details = tv1.getText().toString();
-                            addOrderToDeliver(details, staffname, staffpassword);
-                        }
-                    }
-                });
-                tv2.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (!tv2.getText().toString().equals("")) {
-                            String details = tv2.getText().toString();
-                            addOrderToDeliver(details, staffname, staffpassword);
-                        }
-                    }
-                });
-                tv3.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (!tv3.getText().toString().equals("")) {
-                            String details = tv3.getText().toString();
-                            addOrderToDeliver(details, staffname, staffpassword);
-                        }
-                    }
-                });
-                tv4.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (!tv4.getText().toString().equals("")) {
-                            String details = tv4.getText().toString();
-                            addOrderToDeliver(details, staffname, staffpassword);
-                        }
-                    }
-                });
+                // Set onClickListener for each TextView dynamically
+                setOnClickListenerForOrder(tv1, staffname, staffpassword);
+                setOnClickListenerForOrder(tv2, staffname, staffpassword);
+                setOnClickListenerForOrder(tv3, staffname, staffpassword);
+                setOnClickListenerForOrder(tv4, staffname, staffpassword);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                // Handle any database error
             }
         });
     }
 
-    public static void getDelivery() {
-        databaseOngoingDelivery = FirebaseDatabase.getInstance().getReference("deliverOrder");
+    // Helper method to set onClickListener for each TextView
+    private void setOnClickListenerForOrder(TextView textView, final String staffname, final String staffpassword) {
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!textView.getText().toString().equals("")) {
+                    String details = textView.getText().toString();
+                    addOrderToDeliver(details, staffname, staffpassword);
+                }
+            }
+        });
     }
 
     public void addOrderToDeliver(String details, final String staffname, final String staffpassword) {
@@ -136,30 +124,28 @@ public class AcceptOrders extends AppCompatActivity {
         final String price = details.substring(details.indexOf("PRICE") + 6);
         final String id = databaseOngoingDelivery.push().getKey();
 
-        // Generate a random 6-digit OTP
-        String otp = generateOtp();
-
-        // Create DeliverOrder object with the generated OTP
-        DeliverOrder deliverOrder = new DeliverOrder(name, phone, id, address, specs, staffname, price, otp);  // Pass OTP as an argument
-
-        // Save the order to Firebase
+        // Create the DeliverOrder object and add it to the database with status
+        DeliverOrder deliverOrder = new DeliverOrder(name, phone, id, address, specs, staffname, price, "Pending");
         databaseOngoingDelivery.child(id).setValue(deliverOrder);
+        Toast.makeText(this, "Order added to your to deliver list", Toast.LENGTH_SHORT).show();
 
-        // Show a confirmation message
-        Toast.makeText(this, "Order added to your to deliver list. OTP: " + otp, Toast.LENGTH_SHORT).show();
-
-        // Remove the order from the "orders" database and proceed to the current order status
+        // Remove the order from the orders database and redirect to CurrentOrderStatus
         PlaceOrder.databaseOrders.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
                     Orders orders = orderSnapshot.getValue(Orders.class);
-                    if (orders.getCustname().equals(name) && (orders.getCustphone().equals(phone) && orders.getCustaddr().equals(address) && orders.getSpec().equals(specs))) {
+                    if (orders.getCustname().equals(name) &&
+                            orders.getCustphone().equals(phone) &&
+                            orders.getCustaddr().equals(address) &&
+                            orders.getSpec().equals(specs)) {
+                        // Remove the order from the orders database
                         orderSnapshot.getRef().removeValue();
+
+                        // Pass the necessary data to the next screen
                         Intent i = new Intent(AcceptOrders.this, CurrentOrderStatus.class);
                         i.putExtra("STAFFNAME", staffname);
                         i.putExtra("STAFFPASSWORD", staffpassword);
-                        i.putExtra("ORDERID", id); // Pass order id to track this order
                         startActivity(i);
                     }
                 }
@@ -167,14 +153,9 @@ public class AcceptOrders extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                // Handle database error
             }
         });
-    }
-
-    public String generateOtp() {
-        int otp = (int) (Math.random() * 900000) + 100000; // Generate a 6-digit OTP
-        return String.valueOf(otp);
     }
 
     public void onBackPressed() {
