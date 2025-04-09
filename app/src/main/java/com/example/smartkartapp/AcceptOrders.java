@@ -1,13 +1,13 @@
 package com.example.smartkartapp;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,6 +41,7 @@ public class AcceptOrders extends AppCompatActivity {
 
         databaseOngoingDelivery = FirebaseDatabase.getInstance().getReference("deliverOrder");
 
+        // Listen for changes in orders
         PlaceOrder.getOrder();
 
         PlaceOrder.databaseOrders.addValueEventListener(new ValueEventListener() {
@@ -83,6 +84,7 @@ public class AcceptOrders extends AppCompatActivity {
                         tvtopmsg.setText("Tap on an order to start its delivery");
                     }
                 }
+
                 // No ongoing orders message
                 if (i == 0) {
                     tvtopmsg.setText("There are no ongoing orders");
@@ -116,6 +118,7 @@ public class AcceptOrders extends AppCompatActivity {
         });
     }
 
+    // Add the order to the delivery list
     public void addOrderToDeliver(String details, final String staffname, final String staffpassword) {
         final String name = details.substring(5, details.indexOf("\nPHONE"));
         final String phone = details.substring(details.indexOf("PHONE") + 6, details.indexOf("\nADDRESS"));
@@ -124,8 +127,8 @@ public class AcceptOrders extends AppCompatActivity {
         final String price = details.substring(details.indexOf("PRICE") + 6);
         final String id = databaseOngoingDelivery.push().getKey();
 
-        // Create the DeliverOrder object and add it to the database with status
-        DeliverOrder deliverOrder = new DeliverOrder(name, phone, id, address, specs, staffname, price, "Pending");
+        // Create the DeliverOrder object and add it to the database
+        DeliverOrder deliverOrder = new DeliverOrder(name, phone, id, address, specs, staffname, price, "Awaiting Confirmation");
         databaseOngoingDelivery.child(id).setValue(deliverOrder);
         Toast.makeText(this, "Order added to your to deliver list", Toast.LENGTH_SHORT).show();
 
@@ -158,6 +161,29 @@ public class AcceptOrders extends AppCompatActivity {
         });
     }
 
+    // In-app alert for order updates
+    private void showOrderAlert(String message) {
+        Toast.makeText(AcceptOrders.this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    // Listen for new orders and display alert
+    public void checkForNewOrders() {
+        PlaceOrder.databaseOrders.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    showOrderAlert("New order detected!");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle error
+            }
+        });
+    }
+
+    @Override
     public void onBackPressed() {
         startActivity(new Intent(AcceptOrders.this, StaffLogin.class));
     }
