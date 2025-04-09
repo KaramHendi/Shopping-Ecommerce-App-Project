@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -19,6 +18,7 @@ public class StaffLogin extends AppCompatActivity {
     EditText stfname, stfpass;
     TextView stfstatus;
     Button stflogin;
+    String sna, spa;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,101 +30,99 @@ public class StaffLogin extends AppCompatActivity {
         stfstatus = findViewById(R.id.stfstatus);
         stflogin = findViewById(R.id.stflogin);
 
-        // Clear any previous status
         stfstatus.setText("");
 
-        // Initialize staff database reference
-        AddStaff.getStaff();
-
-        // Login button click listener
         stflogin.setOnClickListener(v -> {
-            String enteredName = stfname.getText().toString().trim();
-            String enteredPass = stfpass.getText().toString().trim();
+            sna = stfname.getText().toString().trim();
+            spa = stfpass.getText().toString().trim();
 
             // Validate input
-            if (TextUtils.isEmpty(enteredName)) {
-                stfstatus.setText("Please enter your name");
+            if (TextUtils.isEmpty(sna)) {
+                stfstatus.setText("Please enter your name.");
                 return;
-            }
-            if (TextUtils.isEmpty(enteredPass)) {
-                stfstatus.setText("Please enter your password");
+            } else if (TextUtils.isEmpty(spa)) {
+                stfstatus.setText("Please enter your password.");
                 return;
             }
 
-            // Check credentials against the database
+            stfstatus.setText("Checking credentials...");
+
+            // Fetch staff details from the database
+            AddStaff.getStaff();
             AddStaff.databaseUsers.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot staffSnapshot) {
-                    boolean found = false;
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    boolean success = false;
 
-                    // Iterate through all staff members to check if credentials match
-                    for (DataSnapshot snap : staffSnapshot.getChildren()) {
-                        StaffReg staff = snap.getValue(StaffReg.class);
-                        if (staff != null && staff.getStaffname().equals(enteredName) && staff.getPassword().equals(enteredPass)) {
-                            found = true;
-                            checkOngoingDelivery(staff.getStaffname(), staff.getPassword());
-                            break;
+                    for (DataSnapshot staffSnapshot : dataSnapshot.getChildren()) {
+                        StaffReg staffReg = staffSnapshot.getValue(StaffReg.class);
+                        if (staffReg != null) {
+                            String dpn = staffReg.getStaffname();
+                            String dpa = staffReg.getPassword();
+
+                            if (dpn != null && dpa != null &&
+                                    dpn.equals(sna) && dpa.equals(spa)) {
+                                success = true;
+                                stfstatus.setText("Login successful. Checking delivery status...");
+                                handleStaffLogin(dpn, dpa);
+                                break;
+                            }
                         }
                     }
 
-                    // If not found, display error
-                    if (!found) {
-                        stfstatus.setText("Invalid Credentials or Phone number mismatch");
+                    if (!success) {
+                        stfstatus.setText("Staff not found or password incorrect.");
                     }
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    stfstatus.setText("Database error: " + error.getMessage());
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    stfstatus.setText("Database error: " + databaseError.getMessage());
                 }
             });
         });
     }
 
-    private void checkOngoingDelivery(String name, String password) {
-        // Initialize delivery database reference
+    private void handleStaffLogin(String staffName, String password) {
         AcceptOrders.getDelivery();
-
         AcceptOrders.databaseOngoingDelivery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot deliverySnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 boolean isBusy = false;
 
-                // Check if the staff is already assigned to an ongoing delivery
-                for (DataSnapshot snap : deliverySnapshot.getChildren()) {
-                    DeliverOrder order = snap.getValue(DeliverOrder.class);
-                    if (order != null && order.getDeliveryStaffName().equals(name)) {
+                for (DataSnapshot deliverySnapshot : dataSnapshot.getChildren()) {
+                    DeliverOrder deliverOrder = deliverySnapshot.getValue(DeliverOrder.class);
+                    if (deliverOrder != null && deliverOrder.getDeliveryStaffName().equals(staffName)) {
                         isBusy = true;
-                        // Staff is busy, redirect to current order status page
-                        Intent i = new Intent(StaffLogin.this, CurrentOrderStatus.class);
-                        i.putExtra("STAFFNAME", name);
-                        i.putExtra("STAFFPASSWORD", password);
-                        startActivity(i);
+                        stfstatus.setText("You have an ongoing delivery. Redirecting...");
+                        Intent intent = new Intent(StaffLogin.this, CurrentOrderStatus.class);
+                        intent.putExtra("STAFFNAME", staffName);
+                        intent.putExtra("STAFFPASSWORD", password);
+                        startActivity(intent);
                         finish();
                         break;
                     }
                 }
 
-                // If staff is not busy, show available orders
                 if (!isBusy) {
-                    Intent i = new Intent(StaffLogin.this, AcceptOrders.class);
-                    i.putExtra("STAFFNAME", name);
-                    i.putExtra("STAFFPASSWORD", password);
-                    startActivity(i);
+                    stfstatus.setText("No current delivery. Redirecting to Accept Orders...");
+                    Intent intent = new Intent(StaffLogin.this, AcceptOrders.class);
+                    intent.putExtra("STAFFNAME", staffName);
+                    intent.putExtra("STAFFPASSWORD", password);
+                    startActivity(intent);
                     finish();
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                stfstatus.setText("Delivery DB error: " + error.getMessage());
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                stfstatus.setText("Delivery database error: " + databaseError.getMessage());
             }
         });
     }
 
     @Override
     public void onBackPressed() {
-        // Handle back press to navigate to RegLogChoice
         startActivity(new Intent(StaffLogin.this, RegLogChoice.class));
         finish();
     }

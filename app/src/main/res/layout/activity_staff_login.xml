@@ -7,81 +7,77 @@
     tools:context=".StaffLogin"
     android:background="@drawable/stafflogi">
 
-    <!-- Username EditText -->
     <EditText
         android:id="@+id/stfname"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Enter username"
         android:inputType="textPersonName"
         android:textColorHint="#FFEB3B"
-        app:layout_constraintBottom_toTopOf="@+id/stfpass"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.444"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.2" />
+        app:layout_constraintVertical_bias="0.259" />
 
-    <!-- Password EditText -->
     <EditText
         android:id="@+id/stfpass"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="Enter password"
         android:inputType="textPassword"
         android:textColorHint="#FFEB3B"
-        app:layout_constraintBottom_toTopOf="@+id/stflogin"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.444"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/stfname"
-        app:layout_constraintVertical_bias="0.3" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Login Button -->
     <Button
         android:id="@+id/stflogin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#FFEB3B"
+        android:layout_width="371dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="10dp"
+        android:backgroundTint="#ffeb3b"
         android:text="Login as Staff"
-        app:layout_constraintBottom_toTopOf="@+id/stfstatus"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.529"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/stfpass" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.744" />
 
-    <!-- Welcome Message TextView -->
     <TextView
         android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="We wish you a happy working day"
+        android:layout_width="385dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="10dp"
+        android:text="          We wish you  a happy working day"
         android:textColor="#FFEB3B"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.615"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/stflogin"
-        app:layout_constraintVertical_bias="0.6" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
-    <!-- Status/Error message TextView -->
     <TextView
         android:id="@+id/stfstatus"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="248dp"
+        android:layout_height="85dp"
         android:textColor="#FFEB3B"
         android:textSize="18sp"
-        android:gravity="center"
-        android:padding="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.098"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView3"
-        app:layout_constraintVertical_bias="0.9" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.885" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
