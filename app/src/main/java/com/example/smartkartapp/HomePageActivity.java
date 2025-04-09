@@ -2,7 +2,8 @@ package com.example.smartkartapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -28,17 +29,11 @@ public class HomePageActivity extends AppCompatActivity {
         // Handle different roles
         if (userRole != null) {
             if (userRole.equals("admin")) {
-                // Admin has full access, show admin-related features
                 Toast.makeText(this, "Welcome Admin", Toast.LENGTH_SHORT).show();
-                // Additional setup for admin features if needed
             } else if (userRole.equals("staff")) {
-                // Staff has limited access
                 Toast.makeText(this, "Welcome Staff", Toast.LENGTH_SHORT).show();
-                // You can limit staff access here by hiding/showing specific views
             } else if (userRole.equals("user")) {
-                // Regular users have access to general features
                 Toast.makeText(this, "Welcome User", Toast.LENGTH_SHORT).show();
-                // Setup for user interface
             }
         } else {
             Toast.makeText(this, "Role not found", Toast.LENGTH_SHORT).show();
@@ -59,5 +54,23 @@ public class HomePageActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         startActivity(new Intent(HomePageActivity.this, RegLogChoice.class));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.customerOrders:
+                // Navigate to the customer's order page
+                startActivity(new Intent(this, CustomerOrderConfirmation.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_home_page_drawer, menu);
+        return true;
     }
 }

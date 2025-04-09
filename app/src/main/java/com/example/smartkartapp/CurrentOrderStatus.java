@@ -1,8 +1,5 @@
 package com.example.smartkartapp;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -11,22 +8,26 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class CurrentOrderStatus extends AppCompatActivity {
 
     TextView custName, custAddr, custPhone, orderDet, orderPrice;
     EditText custPass;
-    Button confirmDelivery;
+    Button confirmDelivery, orderDeliveredButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_order_status);
 
-        // Initializing UI components
+        // Initialize UI components
         custName = findViewById(R.id.tvCustName);
         custPhone = findViewById(R.id.tvCustPhone);
         custAddr = findViewById(R.id.tvCustAddr);
@@ -34,25 +35,19 @@ public class CurrentOrderStatus extends AppCompatActivity {
         orderPrice = findViewById(R.id.tvItemPrice);
         confirmDelivery = findViewById(R.id.confirmDelivery);
         custPass = findViewById(R.id.tvCustPass);
+        orderDeliveredButton = findViewById(R.id.orderDeliveredButton);  // New button for "Order Delivered"
 
-        // Resetting fields
-        custName.setText("");
-        custAddr.setText("");
-        orderDet.setText("");
-        custPhone.setText("");
-        custPass.setText("");
-
+        // Get staff name from intent
         final String staffname = getIntent().getStringExtra("STAFFNAME");
-        final String staffpassword = getIntent().getStringExtra("STAFFPASSWORD");
 
-        // Fetch ongoing delivery orders
-        AcceptOrders.databaseOngoingDelivery.addValueEventListener(new ValueEventListener() {
+        // Fetch ongoing orders for the staff
+        FirebaseDatabase.getInstance().getReference("Orders").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot deliverySnapshot : dataSnapshot.getChildren()) {
                     DeliverOrder deliverOrder = deliverySnapshot.getValue(DeliverOrder.class);
                     if (deliverOrder != null && deliverOrder.getDeliveryStaffName().equals(staffname)) {
-                        // Fill in customer details from the deliver order
+                        // Fill in the order details for the staff
                         custName.setText(deliverOrder.getName());
                         custPhone.setText(deliverOrder.getPhone());
                         custAddr.setText(deliverOrder.getAddress());
@@ -64,93 +59,75 @@ public class CurrentOrderStatus extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle any errors while fetching data
+                // Handle errors if any
             }
         });
 
-        // Handle confirm delivery button click
+        // Handle confirm delivery button click (sets status to "Awaiting Customer Confirmation")
         confirmDelivery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkDeliveryConfirmation();
+                updateOrderStatusToAwaitingCustomerConfirmation(staffname);
+            }
+        });
+
+        // Handle "Order Delivered" button click (sets status to "Delivered")
+        orderDeliveredButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateOrderStatusToDelivered(staffname);
             }
         });
     }
 
-    public void checkDeliveryConfirmation() {
-        if (TextUtils.isEmpty(custPass.getText().toString())) {
-            Toast.makeText(this, "Please enter the OTP", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    public void updateOrderStatusToAwaitingCustomerConfirmation(String staffname) {
+        // Update the order status to "Awaiting Customer Confirmation"
+        FirebaseDatabase.getInstance().getReference("Orders").orderByChild("deliveryStaffName").equalTo(staffname)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
+                            String orderId = orderSnapshot.getKey();
+                            FirebaseDatabase.getInstance().getReference("Orders").child(orderId)
+                                    .child("status").setValue("Awaiting Customer Confirmation");
 
-        // Fetch ongoing delivery orders to get OTP
-        AcceptOrders.databaseOngoingDelivery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
-                    DeliverOrder deliverOrder = orderSnapshot.getValue(DeliverOrder.class);
-                    if (deliverOrder != null && deliverOrder.getName().equals(custName.getText().toString())
-                            && deliverOrder.getPhone().equals(custPhone.getText().toString())) {
-
-                        // Check if the entered OTP matches
-                        if (custPass.getText().toString().equals(deliverOrder.getOtp())) {
-                            completeDelivery(deliverOrder);
-                        } else {
-                            showError();
+                            // Send notification to customer
+                            sendCustomerNotification(orderId, "Awaiting Customer Confirmation");
                         }
                     }
-                }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle errors while fetching data
-            }
-        });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // Handle errors if any
+                    }
+                });
     }
 
-    private void completeDelivery(DeliverOrder deliverOrder) {
-        // Remove the order from the database after delivery confirmation
-        AcceptOrders.databaseOngoingDelivery.child(deliverOrder.getId()).removeValue();
+    public void updateOrderStatusToDelivered(String staffname) {
+        // Update the order status to "Delivered"
+        FirebaseDatabase.getInstance().getReference("Orders").orderByChild("deliveryStaffName").equalTo(staffname)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
+                            String orderId = orderSnapshot.getKey();
+                            FirebaseDatabase.getInstance().getReference("Orders").child(orderId)
+                                    .child("status").setValue("Delivered");
 
-        // Show success message
-        showSuccess();
+                            // Send notification to customer
+                            sendCustomerNotification(orderId, "Delivered");
+                        }
+                    }
 
-        // Reset fields and navigate to AcceptOrders screen
-        resetFields();
-        navigateToAcceptOrders();
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // Handle errors if any
+                    }
+                });
     }
 
-    private void resetFields() {
-        // Reset the fields to be empty
-        custName.setText("");
-        custAddr.setText("");
-        orderDet.setText("");
-        custPhone.setText("");
-        custPass.setText("");
-    }
-
-    private void navigateToAcceptOrders() {
-        String staffname = getIntent().getStringExtra("STAFFNAME");
-        String staffpassword = getIntent().getStringExtra("STAFFPASSWORD");
-        Intent i = new Intent(CurrentOrderStatus.this, AcceptOrders.class);
-        i.putExtra("STAFFNAME", staffname);
-        i.putExtra("STAFFPASSWORD", staffpassword);
-        startActivity(i);
-        finish();
-    }
-
-    public void showSuccess() {
-        Toast.makeText(this, "Order delivered successfully", Toast.LENGTH_SHORT).show();
-    }
-
-    public void showError() {
-        Toast.makeText(this, "Incorrect OTP", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Prevent user from going back without confirming delivery
-        Toast.makeText(this, "Please deliver this order before you log out", Toast.LENGTH_SHORT).show();
+    private void sendCustomerNotification(String orderId, String status) {
+        // Send a notification to the customer (simulated via a toast for simplicity)
+        Toast.makeText(this, "Notification sent to the customer: Order " + status, Toast.LENGTH_SHORT).show();
     }
 }
