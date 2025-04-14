@@ -23,7 +23,7 @@
         android:id="@+id/tvPhone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="The one final destination for  your needs"
+        android:text="The one final destination for your needs"
         android:textColor="#e91e63"
         android:textSize="18sp"
         android:textStyle="bold"
