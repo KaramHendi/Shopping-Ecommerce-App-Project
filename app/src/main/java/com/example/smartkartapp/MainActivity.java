@@ -22,13 +22,15 @@ public class MainActivity extends AppCompatActivity {
         ImageView imageView = findViewById(R.id.imageView);
         TextView textView = findViewById(R.id.tvPhone);
 
-        // Load the new bounce and zoom-in animations
-        Animation bounceFadeIn = AnimationUtils.loadAnimation(this, R.anim.bounce_fade_in);
-        Animation zoomFadeIn = AnimationUtils.loadAnimation(this, R.anim.zoom_fade_in);
+        // Load the animations
+        Animation bounceFadeIn = AnimationUtils.loadAnimation(this, R.anim.bounce_fade_in); // For logo
+        Animation zoomRotateFadeIn = AnimationUtils.loadAnimation(this, R.anim.zoom_rotate_fade_in); // For text
+        Animation scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_animation); // For scaling the image
 
         // Apply animations
         imageView.startAnimation(bounceFadeIn);
-        textView.startAnimation(zoomFadeIn);
+        imageView.startAnimation(scaleAnimation); // Apply the scaling animation to the image
+        textView.startAnimation(zoomRotateFadeIn);
 
         // Timer to switch activity after the animation
         Timer timer = new Timer();
