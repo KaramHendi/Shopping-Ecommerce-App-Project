@@ -23,11 +23,14 @@ public class RegLogChoice extends AppCompatActivity {
     FirebaseAuth mAuth;
     DatabaseReference mDatabase;
 
+    private String userRole = "";
+    private String userPhone = "";
+
     @Override
     protected void onResume() {
         super.onResume();
         animateLogo();
-        checkUserRole();
+        checkUserRole();  // Refresh visibility when coming back
     }
 
     @Override
@@ -35,35 +38,46 @@ public class RegLogChoice extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reg_log_choice);
 
+        // Initialize views
         reg = findViewById(R.id.btnreg);
         log = findViewById(R.id.btnlog);
         admlog = findViewById(R.id.admlog);
         stflog = findViewById(R.id.stflog);
         about = findViewById(R.id.tvAbout);
-        continueBtn = findViewById(R.id.btnContinue); // New Button
+        continueBtn = findViewById(R.id.btnContinue);  // New Continue Button
 
+        // Initialize Firebase instances
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference("users");
 
+        // Hide both admin and staff login options initially
         admlog.setVisibility(View.GONE);
         stflog.setVisibility(View.GONE);
-        continueBtn.setVisibility(View.GONE); // Hide by default
+        continueBtn.setVisibility(View.GONE);  // Hide by default
 
-        String userRole = getIntent().getStringExtra("USER_ROLE");
-        if (userRole != null) {
-            updateRoleVisibility(userRole);
-        }
-
+        // Button click listeners
         log.setOnClickListener(v -> startActivity(new Intent(this, LoginPage.class)));
         reg.setOnClickListener(v -> startActivity(new Intent(this, RegisterPage.class)));
         admlog.setOnClickListener(v -> startActivity(new Intent(this, AdminLogin.class)));
         stflog.setOnClickListener(v -> startActivity(new Intent(this, StaffLogin.class)));
         about.setOnClickListener(v -> startActivity(new Intent(this, About.class)));
-        continueBtn.setOnClickListener(v -> startActivity(new Intent(this, HomePageActivity.class)));
+
+        // Continue to home page with role and phone
+        continueBtn.setOnClickListener(v -> {
+            if (!userRole.isEmpty() && !userPhone.isEmpty()) {
+                Intent intent = new Intent(this, HomePageActivity.class);
+                intent.putExtra("USER_ROLE", userRole);
+                intent.putExtra("USER_ID", userPhone);
+                startActivity(intent);
+            } else {
+                Toast.makeText(RegLogChoice.this, "Unable to fetch user data", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void animateLogo() {
         ImageView logo = findViewById(R.id.imageView2);
+
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(logo, "scaleX", 1f, 1.5f, 1f);
         ObjectAnimator scaleY = ObjectAnimator.ofFloat(logo, "scaleY", 1f, 1.5f, 1f);
         ObjectAnimator rotate = ObjectAnimator.ofFloat(logo, "rotation", 0f, 360f);
@@ -88,19 +102,23 @@ public class RegLogChoice extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
                     if (snapshot.exists()) {
-                        continueBtn.setVisibility(View.VISIBLE);
-                        String role = snapshot.child("role").getValue(String.class);
-                        if (role != null) {
-                            updateRoleVisibility(role);
+                        userRole = snapshot.child("role").getValue(String.class);
+                        userPhone = snapshot.child("phone").getValue(String.class);
+
+                        if (userRole != null) {
+                            updateRoleVisibility(userRole);
+                        } else {
+                            FirebaseAuth.getInstance().signOut();
+                            Toast.makeText(RegLogChoice.this, "Role not found, signed out", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        FirebaseAuth.getInstance().signOut();
+                        Toast.makeText(RegLogChoice.this, "User data not found", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError error) {
-                    Toast.makeText(RegLogChoice.this, "Error loading user info", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegLogChoice.this, "Error loading user data", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -110,8 +128,17 @@ public class RegLogChoice extends AppCompatActivity {
         if (role.equals("admin")) {
             admlog.setVisibility(View.VISIBLE);
             stflog.setVisibility(View.VISIBLE);
+            continueBtn.setVisibility(View.VISIBLE);
         } else if (role.equals("staff")) {
             stflog.setVisibility(View.VISIBLE);
+            continueBtn.setVisibility(View.VISIBLE);
+        } else if (role.equals("user")) {
+            continueBtn.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Do nothing, or add custom behavior if needed
     }
 }

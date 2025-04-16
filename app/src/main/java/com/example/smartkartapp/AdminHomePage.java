@@ -37,6 +37,6 @@ Button addStaff,addStock;
 
     }
     public void onBackPressed(){
-        startActivity(new Intent(AdminHomePage.this,AdminLogin.class));
+        startActivity(new Intent(AdminHomePage.this,RegLogChoice.class));
     }
 }

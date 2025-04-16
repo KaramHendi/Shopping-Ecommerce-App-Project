@@ -47,7 +47,7 @@ public class StaffHomePage extends AppCompatActivity {
 
     }
     public void onBackPressed(){
-        startActivity(new Intent(StaffHomePage.this,StaffLogin.class));
+        startActivity(new Intent(StaffHomePage.this,RegLogChoice.class));
     }
     public void show(){
         Toast.makeText(this,"Accept a delivery in order to check its status",Toast.LENGTH_SHORT).show();

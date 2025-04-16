@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.smartkartapp">
 
@@ -32,13 +31,18 @@
         <activity android:name=".StaffHomePage" />
         <activity android:name=".AdminHomePage" />
         <activity android:name=".AdminLogin" />
+
+        <!-- HomePageActivity updated with the correct theme -->
         <activity
             android:name=".HomePageActivity"
             android:label="@string/title_activity_home_page"
             android:theme="@style/AppTheme.NoActionBar" />
+
         <activity android:name=".RegisterPage" />
         <activity android:name=".LoginPage" />
         <activity android:name=".RegLogChoice" />
+
+        <!-- MainActivity as entry point -->
         <activity
             android:name=".MainActivity"
             android:exported="true">

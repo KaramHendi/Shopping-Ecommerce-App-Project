@@ -96,7 +96,7 @@ public class AddStaff extends AppCompatActivity {
                                                     // Sign out staff and re-login as admin
                                                     mAuth.signOut();
                                                     FirebaseUser currentAdmin = mAuth.getCurrentUser();
-                                                    String adminEmail = currentAdmin.getEmail();
+                                                    String adminEmail = "0587654321@smartkart.com";
                                                     String adminPassword = "appadmin123"; // update if needed
                                                     mAuth.signInWithEmailAndPassword(adminEmail, adminPassword)
                                                             .addOnCompleteListener(loginTask -> {

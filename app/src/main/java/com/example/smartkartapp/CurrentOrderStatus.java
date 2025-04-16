@@ -2,178 +2,118 @@ package com.example.smartkartapp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class CurrentOrderStatus extends AppCompatActivity {
 
-    TextView custName, custAddr, custPhone, orderDet, orderPrice;
-    EditText custPass;
-    Button confirmDelivery;
+    TextView tv1, tv2, tv3, tv4, tvtopmsg;
+    Button btnDelivered;
+    String staffname;
+    String[] deliveryKeys = new String[4];
+
+    DatabaseReference databaseDeliveries;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_order_status);
 
-        custName = findViewById(R.id.tvCustName);
-        custPhone = findViewById(R.id.tvCustPhone);
-        custAddr = findViewById(R.id.tvCustAddr);
-        orderDet = findViewById(R.id.tvdet);
-        orderPrice = findViewById(R.id.tvItemPrice);
-        confirmDelivery = findViewById(R.id.confirmDelivery);
-        custPass = findViewById(R.id.tvCustPass);
+        tv1 = findViewById(R.id.tv1);
+        tv2 = findViewById(R.id.tv2);
+        tv3 = findViewById(R.id.tv3);
+        tv4 = findViewById(R.id.tv4);
+        tvtopmsg = findViewById(R.id.tvItemPrice);
+        btnDelivered = findViewById(R.id.confirmDelivery);
 
-        // Clear the fields initially
-        custName.setText("");
-        custAddr.setText("");
-        orderDet.setText("");
-        custPhone.setText("");
-        custPass.setText("");
+        staffname = getIntent().getStringExtra("STAFFNAME");
+        databaseDeliveries = FirebaseDatabase.getInstance().getReference("deliverOrder");
 
-        final String staffname = getIntent().getStringExtra("STAFFNAME");
-        final String staffpassword = getIntent().getStringExtra("STAFFPASSWORD");
+        loadDeliveries();
 
-        // Fetch ongoing deliveries
-        AcceptOrders.databaseOngoingDelivery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot deliverySnapshot : dataSnapshot.getChildren()) {
-                    DeliverOrder deliverOrder = deliverySnapshot.getValue(DeliverOrder.class);
-                    if (deliverOrder.getDeliveryStaffName().equals(staffname)) {
-                        // Populate fields with order details
-                        custName.setText(deliverOrder.getName());
-                        custPhone.setText(deliverOrder.getPhone());
-                        custAddr.setText(deliverOrder.getAddress());
-                        orderDet.setText(deliverOrder.getOrderDetails());
-                        orderPrice.setText(deliverOrder.getPrice());
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle cancellation
-            }
-        });
-
-        // Confirm delivery button click
-        confirmDelivery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkDeliveryConfirmation();
-            }
-        });
+        btnDelivered.setOnClickListener(v -> showConfirmationDialog());
     }
 
-    public void checkDeliveryConfirmation() {
-        // Check if password field is empty
-        if (TextUtils.isEmpty(custPass.getText().toString())) {
-            Toast.makeText(this, "Please enter the customer's password to confirm delivery", Toast.LENGTH_SHORT).show();
-        } else {
-            // Get user data from Firebase
-            RegisterPage.getuser();
-            RegisterPage.databaseUsers.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
-                        MemberReg memberReg = userSnapshot.getValue(MemberReg.class);
-                        final String name = memberReg.getUsername();
-                        final String phone = memberReg.getPhone();
-                        String password = memberReg.getPassword();
+    private void loadDeliveries() {
+        databaseDeliveries.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int i = 0;
+                for (DataSnapshot deliverySnap : snapshot.getChildren()) {
+                    DeliverOrder order = deliverySnap.getValue(DeliverOrder.class);
+                    if (order != null && staffname.equals(order.getDeliveryStaffName())) {
+                        String details = "NAME:" + order.getName() +
+                                "\nPHONE:" + order.getPhone() +
+                                "\nADDRESS:" + order.getAddress() +
+                                "\nORDER DETAILS:" + order.getPrice() +
+                                "\nPRICE:" + order.getPrice();
 
-                        // Check if customer exists and password matches
-                        if (name.equals(custName.getText().toString()) && phone.equals(custPhone.getText().toString())) {
-                            if (password.equals(custPass.getText().toString())) {
-                                AcceptOrders.getDelivery();
-                                AcceptOrders.databaseOngoingDelivery.addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
-                                            DeliverOrder deliverOrder = orderSnapshot.getValue(DeliverOrder.class);
-                                            if (name.equals(deliverOrder.getName()) && phone.equals(deliverOrder.getPhone()) &&
-                                                    (orderDet.getText().toString()).equals(deliverOrder.getOrderDetails())) {
-                                                // Remove order from ongoing deliveries
-                                                orderSnapshot.getRef().removeValue();
+                        deliveryKeys[i] = deliverySnap.getKey();
 
-                                                // Show success message
-                                                showSuccess();
-
-                                                // Clear fields after delivery
-                                                clearFields();
-
-                                                // Redirect to AcceptOrders screen
-                                                String staffname = getIntent().getStringExtra("STAFFNAME");
-                                                String staffpassword = getIntent().getStringExtra("STAFFPASSWORD");
-                                                Intent i = new Intent(CurrentOrderStatus.this, AcceptOrders.class);
-                                                i.putExtra("STAFFNAME", staffname);
-                                                i.putExtra("STAFFPASSWORD", staffpassword);
-                                                startActivity(i);
-                                                finish();
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                                        // Handle error
-                                    }
-                                });
-                            } else {
-                                // Show error message for incorrect password
-                                showError("Incorrect password. Please make sure the password is correct.");
-                            }
+                        switch (i) {
+                            case 0: tv1.setText(details); break;
+                            case 1: tv2.setText(details); break;
+                            case 2: tv3.setText(details); break;
+                            case 3: tv4.setText(details); break;
                         }
+
+                        i++;
+                        if (i >= 4) break;
                     }
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    // Handle database cancellation
+                if (i > 0) {
+                    tvtopmsg.setText("Deliver the orders and tap Delivered");
+                } else {
+                    tv1.setText("");
+                    tv2.setText("");
+                    tv3.setText("");
+                    tv4.setText("");
+                    tvtopmsg.setText("You have no current deliveries.");
                 }
-            });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(CurrentOrderStatus.this, "Failed to load deliveries", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showConfirmationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Confirm Delivery")
+                .setMessage("Are you sure the order has been delivered?")
+                .setPositiveButton("Yes", (dialog, which) -> markAsDelivered())
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void markAsDelivered() {
+        for (String key : deliveryKeys) {
+            if (key != null) {
+                databaseDeliveries.child(key).removeValue();
+            }
         }
+
+        Toast.makeText(this, "Order status updated to Pending Confirmation", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(CurrentOrderStatus.this, AcceptOrders.class));
+        finish();
     }
 
-    // Show success message
-    public void showSuccess() {
-        Toast.makeText(this, "Order delivered successfully! You can now proceed with the next delivery.", Toast.LENGTH_LONG).show();
-    }
-
-    // Show error message
-    public void showError(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
-
-    // Clear input fields after successful delivery
-    public void clearFields() {
-        custName.setText("");
-        custAddr.setText("");
-        orderDet.setText("");
-        custPhone.setText("");
-        custPass.setText("");
-    }
-
-    // Handle back press event
+    @Override
     public void onBackPressed() {
-        Toast.makeText(this, "Please confirm the delivery before logging out.", Toast.LENGTH_LONG).show();
-    }
-
-    // Handle activity destruction
-    public void onDestroy() {
-        super.onDestroy();
-        android.os.Process.killProcess(android.os.Process.myPid());
+        startActivity(new Intent(CurrentOrderStatus.this, CurrentOrderStatus.class));
     }
 }

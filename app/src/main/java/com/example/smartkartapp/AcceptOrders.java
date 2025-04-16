@@ -20,6 +20,8 @@ public class AcceptOrders extends AppCompatActivity {
     TextView tv1, tv2, tv3, tv4, tvtopmsg;
     static DatabaseReference databaseOngoingDelivery;
 
+    String[] orderKeys = new String[4];  // To track original order keys
+
     public static void getDelivery() {
         databaseOngoingDelivery = FirebaseDatabase.getInstance().getReference("deliverOrder");
     }
@@ -29,31 +31,28 @@ public class AcceptOrders extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accept_orders);
 
-        // Initialize TextViews
         tv1 = findViewById(R.id.tv1);
         tv2 = findViewById(R.id.tv2);
         tv3 = findViewById(R.id.tv3);
         tv4 = findViewById(R.id.tv4);
         tvtopmsg = findViewById(R.id.tvtopmsg);
 
-        // Retrieve staff name and password from intent
         final String staffname = getIntent().getStringExtra("STAFFNAME");
         final String staffpassword = getIntent().getStringExtra("STAFFPASSWORD");
 
-        // Initialize Firebase reference
         databaseOngoingDelivery = FirebaseDatabase.getInstance().getReference("deliverOrder");
 
-        // Fetch orders from the PlaceOrder class (assuming it's already implemented)
         PlaceOrder.getOrder();
 
-        // Add listener to check for ongoing orders
         PlaceOrder.databaseOrders.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int i = 0;
                 for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
-                    i++;
+                    if (i >= 4) break;
+
                     Orders orders = orderSnapshot.getValue(Orders.class);
+                    assert orders != null;
                     String name = orders.getCustname();
                     String phone = orders.getCustphone();
                     String address = orders.getCustaddr();
@@ -61,95 +60,79 @@ public class AcceptOrders extends AppCompatActivity {
                     int price = orders.getPrice();
                     String details = "NAME:" + name + "\nPHONE:" + phone + "\nADDRESS:" + address + "\nORDER DETAILS:" + specs + "\nPRICE:" + price;
 
+                    orderKeys[i] = orderSnapshot.getKey(); // Track the original order key
+
                     switch (i) {
-                        case 1:
+                        case 0:
                             tv1.setText(details);
-                            tv2.setText("");
-                            tv3.setText("");
-                            tv4.setText("");
+                            break;
+                        case 1:
+                            tv2.setText(details);
                             break;
                         case 2:
-                            tv2.setText(details);
-                            tv3.setText("");
-                            tv4.setText("");
+                            tv3.setText(details);
                             break;
                         case 3:
-                            tv3.setText(details);
-                            tv4.setText("");
-                            break;
-                        case 4:
                             tv4.setText(details);
                             break;
                     }
-
-                    if (i > 0)
-                        tvtopmsg.setText("Tap on an order to start its delivery");
+                    i++;
                 }
 
-                if (i == 0)
+                if (i > 0) {
+                    tvtopmsg.setText("Tap on an order to start its delivery");
+                } else {
                     tv1.setText("");
-
-                if (tv1.getText().equals(""))
                     tvtopmsg.setText("There are no ongoing orders");
+                }
 
-                // Handle order clicks for delivery
                 setupOrderClickListeners(staffname, staffpassword);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle database error
+                Toast.makeText(AcceptOrders.this, "Failed to load orders", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void setupOrderClickListeners(final String staffname, final String staffpassword) {
-        // Set click listeners on orders
-        tv1.setOnClickListener(v -> {
-            if (!tv1.getText().toString().equals("")) {
-                String details = tv1.getText().toString();
-                addOrderToDeliver(details, staffname, staffpassword);
-            }
-        });
-        tv2.setOnClickListener(v -> {
-            if (!tv2.getText().toString().equals("")) {
-                String details = tv2.getText().toString();
-                addOrderToDeliver(details, staffname, staffpassword);
-            }
-        });
-        tv3.setOnClickListener(v -> {
-            if (!tv3.getText().toString().equals("")) {
-                String details = tv3.getText().toString();
-                addOrderToDeliver(details, staffname, staffpassword);
-            }
-        });
-        tv4.setOnClickListener(v -> {
-            if (!tv4.getText().toString().equals("")) {
-                String details = tv4.getText().toString();
-                addOrderToDeliver(details, staffname, staffpassword);
-            }
-        });
+        tv1.setOnClickListener(v -> handleOrderClick(tv1.getText().toString(), staffname, staffpassword, 0));
+        tv2.setOnClickListener(v -> handleOrderClick(tv2.getText().toString(), staffname, staffpassword, 1));
+        tv3.setOnClickListener(v -> handleOrderClick(tv3.getText().toString(), staffname, staffpassword, 2));
+        tv4.setOnClickListener(v -> handleOrderClick(tv4.getText().toString(), staffname, staffpassword, 3));
     }
 
-    public void addOrderToDeliver(String details, final String staffname, final String staffpassword) {
-        // Extract order details
-        final String name = details.substring(5, details.indexOf("\nPHONE"));
-        final String phone = details.substring(details.indexOf("PHONE") + 6, details.indexOf("\nADDRESS"));
-        final String address = details.substring(details.indexOf("ADDRESS") + 8, details.indexOf("\nORDER DETAILS"));
-        final String specs = details.substring(details.indexOf("ORDER DETAILS") + 14, details.indexOf("\nPRICE"));
-        final String price = details.substring(details.indexOf("PRICE") + 6);
-        final String id = databaseOngoingDelivery.push().getKey();
+    private void handleOrderClick(String details, String staffname, String staffpassword, int index) {
+        if (!details.equals("")) {
+            addOrderToDeliver(details, staffname, staffpassword, orderKeys[index]);
+        }
+    }
 
-        // Create DeliverOrder object
+    public void addOrderToDeliver(String details, final String staffname, final String staffpassword, String orderKey) {
+        String[] lines = details.split("\n");
+        if (lines.length < 5) {
+            Toast.makeText(this, "Invalid order format", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String name = lines[0].replace("NAME:", "").trim();
+        String phone = lines[1].replace("PHONE:", "").trim();
+        String address = lines[2].replace("ADDRESS:", "").trim();
+        String specs = lines[3].replace("ORDER DETAILS:", "").trim();
+        String price = lines[4].replace("PRICE:", "").trim();
+        String id = databaseOngoingDelivery.push().getKey();
+
         DeliverOrder deliverOrder = new DeliverOrder(name, phone, id, address, specs, staffname, price);
+        if (id != null) {
+            databaseOngoingDelivery.child(id).setValue(deliverOrder);
 
-        // Add the order to the Firebase database
-        databaseOngoingDelivery.child(id).setValue(deliverOrder);
+            // ✅ Remove the original order from "orders"
+            PlaceOrder.databaseOrders.child(orderKey).removeValue();
 
-        // Show confirmation toast
-        Toast.makeText(this, "Order added to your to deliver list", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Order moved to your delivery list", Toast.LENGTH_SHORT).show();
+        }
 
-        // Navigate directly to CurrentOrderStatus activity
         Intent i = new Intent(AcceptOrders.this, CurrentOrderStatus.class);
         i.putExtra("STAFFNAME", staffname);
         i.putExtra("STAFFPASSWORD", staffpassword);
@@ -158,7 +141,6 @@ public class AcceptOrders extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // Handle back press to go to StaffLogin
-        startActivity(new Intent(AcceptOrders.this, StaffLogin.class));
+        startActivity(new Intent(AcceptOrders.this, RegLogChoice.class));
     }
 }

@@ -93,8 +93,8 @@ public class RegisterPage extends AppCompatActivity {
                                             Toast.makeText(this, "Registered as " + role, Toast.LENGTH_SHORT).show();
 
                                             Intent intent = new Intent(RegisterPage.this, HomePageActivity.class);
-                                            intent.putExtra("userPhone", phone);
-                                            intent.putExtra("userRole", role);
+                                            intent.putExtra("USER_ROLE", role);  // Pass the user role
+                                            intent.putExtra("USER_ID", phone);      // Pass the user ID
                                             intent.putExtra("CALLINGACTIVITY", "RegisterPage");
                                             startActivity(intent);
                                             finish();

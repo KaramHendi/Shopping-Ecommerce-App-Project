@@ -1,18 +1,18 @@
 package com.example.smartkartapp;
 
 public class DeliverOrder {
-    String name,phone,id,address,orderDetails,deliveryStaffName,price;
+    String name, phone, id, address, orderDetails, deliveryStaffName, price;
 
-    public  DeliverOrder(){}
+    public DeliverOrder() {}
 
-    public DeliverOrder(String name, String phone, String id, String address, String orderDetails,String deliveryStaffName,String price) {
+    public DeliverOrder(String name, String phone, String id, String address, String orderDetails, String deliveryStaffName, String price) {
         this.name = name;
         this.phone = phone;
         this.id = id;
         this.address = address;
         this.orderDetails = orderDetails;
-        this.deliveryStaffName=deliveryStaffName;
-        this.price=price;
+        this.deliveryStaffName = deliveryStaffName;
+        this.price = price;
     }
 
     public String getName() {
@@ -35,8 +35,11 @@ public class DeliverOrder {
         return orderDetails;
     }
 
-    public String getDeliveryStaffName() { return deliveryStaffName; }
+    public String getDeliveryStaffName() {
+        return deliveryStaffName;
+    }
 
-    public String getPrice(){ return price;}
+    public String getPrice() {
+        return price;
+    }
 }
-
