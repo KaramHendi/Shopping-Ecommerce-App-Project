@@ -2,27 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="10dp"
-    android:layout_marginBottom="8dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:padding="8dp"
+    android:orientation="vertical">
 
-    <!-- Order Details TextView -->
     <TextView
-        android:id="@+id/tvOrderDetails"
+        android:id="@+id/order_spec"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Order details"
-        android:textSize="16sp"
-        android:textColor="#000000"
-        android:layout_marginBottom="5dp" />
+        android:text="Item Spec"
+        android:textSize="16sp"/>
 
-    <!-- Order Price TextView -->
     <TextView
-        android:id="@+id/tvOrderPrice"
+        android:id="@+id/order_price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Price"
-        android:textSize="14sp"
-        android:textColor="#000000" />
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/order_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Address"
+        android:textSize="14sp"/>
 </LinearLayout>

@@ -1,51 +1,35 @@
 package com.example.smartkartapp;
 
 public class MemberReg {
-
-    String id, username, password, phone, role;
+    private String phone;
+    private String name;
+    private String password;
+    private String role;
 
     public MemberReg() {
+        // Needed for Firebase
     }
 
-    // Constructor modified to accept String for role
-    public MemberReg(String id, String username, String password, String phone, String role) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
+    public MemberReg(String phone, String name, String password, String role) {
         this.phone = phone;
-        this.role = role;
-    }
-
-    // Getters and Setters
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
+        this.name = name;
         this.password = password;
+        this.role = role;
     }
 
     public String getPhone() {
         return phone;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public String getName() {
+        return name;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getRole() {
         return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 }

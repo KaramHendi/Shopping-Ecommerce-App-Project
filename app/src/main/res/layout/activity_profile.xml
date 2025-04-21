@@ -5,26 +5,37 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- User Role TextView -->
+    <TextView
+        android:id="@+id/tvUserRole"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Role"
+        android:textSize="18sp"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- User Name TextView -->
     <TextView
         android:id="@+id/tvUserName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="User Name"
+        android:text="Name"
         android:textSize="18sp"
         android:layout_marginBottom="8dp"/>
 
+    <!-- User Phone TextView -->
     <TextView
         android:id="@+id/tvUserPhone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="User Phone"
+        android:text="Phone"
         android:textSize="18sp"
         android:layout_marginBottom="8dp"/>
 
+    <!-- Logout Button -->
     <Button
         android:id="@+id/btnLogout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Logout"/>
-
 </LinearLayout>

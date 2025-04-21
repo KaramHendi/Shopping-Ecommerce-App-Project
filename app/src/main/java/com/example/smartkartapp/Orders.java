@@ -1,12 +1,17 @@
 package com.example.smartkartapp;
 
 public class Orders {
-    String custname, custphone, custaddr, custpass;
-    String spec;
-    String id;
-    int price;
+    private String id;
+    private String spec;
+    private String custname;
+    private String custphone;
+    private String custaddr;
+    private String custpass;
+    private int price;
 
-    public Orders() {}
+    public Orders() {
+        // Needed for Firebase
+    }
 
     public Orders(String id, String spec, String custname, String custphone, String custaddr, String custpass, int price) {
         this.id = id;
@@ -18,12 +23,12 @@ public class Orders {
         this.price = price;
     }
 
-    public String getSpec() {
-        return spec;
-    }
-
     public String getId() {
         return id;
+    }
+
+    public String getSpec() {
+        return spec;
     }
 
     public String getCustname() {

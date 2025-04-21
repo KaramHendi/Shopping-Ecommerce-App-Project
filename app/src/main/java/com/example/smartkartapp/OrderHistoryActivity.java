@@ -1,9 +1,11 @@
 package com.example.smartkartapp;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.database.DataSnapshot;
@@ -19,7 +21,6 @@ public class OrderHistoryActivity extends AppCompatActivity {
     private ListView lvOrderHistory;
     private ArrayList<Orders> orderList;
     private OrdersAdapter ordersAdapter;
-    private DatabaseReference databaseOrders;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,37 +32,60 @@ public class OrderHistoryActivity extends AppCompatActivity {
         ordersAdapter = new OrdersAdapter(this, orderList);
         lvOrderHistory.setAdapter(ordersAdapter);
 
-        String userId = getIntent().getStringExtra("USER_ID");
+        String userPhone = getIntent().getStringExtra("USER_PHONE");
 
-        if (userId == null) {
-            Toast.makeText(this, "User ID not found", Toast.LENGTH_SHORT).show();
+        if (userPhone == null || userPhone.isEmpty()) {
+            Toast.makeText(this, "User phone not found", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Firebase reference to orders
-        databaseOrders = FirebaseDatabase.getInstance().getReference("orders");
+        getUserUidAndFetchOrders(userPhone);
+    }
 
-        // Query orders for the specific user
-        databaseOrders.orderByChild("custphone").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void getUserUidAndFetchOrders(String userPhone) {
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+
+        usersRef.orderByChild("phone").equalTo(userPhone).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    orderList.clear();
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        Orders order = snapshot.getValue(Orders.class);
-                        if (order != null) {
-                            orderList.add(order);
-                        }
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot userSnap : snapshot.getChildren()) {
+                        String uid = userSnap.getKey();
+                        Log.d("OrderHistory", "User found with UID: " + uid);
+                        fetchUserOrders(uid);
+                        return;
                     }
-                    ordersAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(OrderHistoryActivity.this, "No orders found", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OrderHistoryActivity.this, "User not found in database", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(OrderHistoryActivity.this, "Database Error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(OrderHistoryActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void fetchUserOrders(String uid) {
+        DatabaseReference userOrdersRef = FirebaseDatabase.getInstance().getReference("userOrders").child(uid);
+
+        userOrdersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                orderList.clear();
+                for (DataSnapshot orderSnap : snapshot.getChildren()) {
+                    Orders order = orderSnap.getValue(Orders.class);
+                    if (order != null) {
+                        orderList.add(order);
+                    }
+                }
+                ordersAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(OrderHistoryActivity.this, "Failed to load orders: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

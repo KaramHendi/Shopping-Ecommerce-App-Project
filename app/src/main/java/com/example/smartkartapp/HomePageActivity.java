@@ -28,6 +28,18 @@ public class HomePageActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if the user is logged in
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            // If user is not logged in, redirect to login page
+            Intent intent = new Intent(HomePageActivity.this, RegLogChoice.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_home_page);
 
         // Toolbar setup
@@ -52,31 +64,35 @@ public class HomePageActivity extends AppCompatActivity
         books = findViewById(R.id.books);
         otherItems = findViewById(R.id.otherItems);
 
-        // Get the role, user ID, user name, and user phone from login screen
+        // Get data from intent safely
         userRole = getIntent().getStringExtra("USER_ROLE");
-        userId = getIntent().getStringExtra("USER_ID");  // Assuming user ID is passed
-        userName = getIntent().getStringExtra("USER_NAME");  // Assuming user name is passed
-        userPhone = getIntent().getStringExtra("USER_PHONE");  // Assuming user phone is passed
+        userId = getIntent().getStringExtra("USER_ID");
+        userName = getIntent().getStringExtra("USER_NAME");
+        userPhone = getIntent().getStringExtra("USER_PHONE");
 
-        if (userRole != null) {
-            switch (userRole) {
-                case "admin":
-                    Toast.makeText(this, "Welcome Admin", Toast.LENGTH_SHORT).show();
-                    break;
-                case "staff":
-                    Toast.makeText(this, "Welcome Staff", Toast.LENGTH_SHORT).show();
-                    break;
-                case "user":
-                    Toast.makeText(this, "Welcome", Toast.LENGTH_SHORT).show();
-                    break;
-                default:
-                    Toast.makeText(this, "Role not found", Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        } else {
-            Toast.makeText(this, "Role not found", Toast.LENGTH_SHORT).show();
+        // Validate data (fall back to default if any data is missing)
+        if (userRole == null) userRole = "user";
+        if (userId == null) userId = "";
+        if (userName == null) userName = "Guest";
+        if (userPhone == null) userPhone = "N/A";
+
+        // Role-based welcome message
+        switch (userRole) {
+            case "admin":
+                Toast.makeText(this, "Welcome Admin", Toast.LENGTH_SHORT).show();
+                break;
+            case "staff":
+                Toast.makeText(this, "Welcome Staff", Toast.LENGTH_SHORT).show();
+                break;
+            case "user":
+                Toast.makeText(this, "Welcome", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Toast.makeText(this, "Role not recognized", Toast.LENGTH_SHORT).show();
+                break;
         }
 
+        // Set category button listeners
         clothing.setOnClickListener(v -> navigateToCategoryActivity(Clothing.class));
         electronics.setOnClickListener(v -> navigateToCategoryActivity(Electronics.class));
         books.setOnClickListener(v -> navigateToCategoryActivity(Books.class));
@@ -98,15 +114,16 @@ public class HomePageActivity extends AppCompatActivity
 
         if (id == R.id.nav_profile) {
             Intent profileIntent = new Intent(this, ProfileActivity.class);
-            profileIntent.putExtra("USER_ROLE", userRole);  // Pass the role to ProfileActivity
-            profileIntent.putExtra("USER_ID", userId);  // Pass the user ID
-            profileIntent.putExtra("USER_NAME", userName);  // Pass the user name
-            profileIntent.putExtra("USER_PHONE", userPhone);  // Pass the user phone
+            profileIntent.putExtra("USER_ROLE", userRole);
+            profileIntent.putExtra("USER_ID", userId);
+            profileIntent.putExtra("USER_NAME", userName);
+            profileIntent.putExtra("USER_PHONE", userPhone);
             startActivity(profileIntent);
         } else if (id == R.id.nav_order_history) {
             Intent historyIntent = new Intent(this, OrderHistoryActivity.class);
-            historyIntent.putExtra("USER_ROLE", userRole);  // Pass the role to OrderHistoryActivity
-            historyIntent.putExtra("USER_ID", userId);  // Pass the user ID to fetch orders
+            historyIntent.putExtra("USER_ROLE", userRole);
+            historyIntent.putExtra("USER_PHONE", userPhone); // Pass correct phone
+            historyIntent.putExtra("USER_ID", userId);
             startActivity(historyIntent);
         } else if (id == R.id.nav_logout) {
             FirebaseAuth.getInstance().signOut();

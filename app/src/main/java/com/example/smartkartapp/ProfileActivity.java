@@ -1,44 +1,57 @@
 package com.example.smartkartapp;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Bundle;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.*;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private TextView tvUserName, tvUserPhone;
-    private Button btnLogout;
+    TextView profileName, profilePhone, profileRole;
+    DatabaseReference databaseReference;
+    FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        // Initialize Views
-        tvUserName = findViewById(R.id.tvUserName);
-        tvUserPhone = findViewById(R.id.tvUserPhone);
-        btnLogout = findViewById(R.id.btnLogout);
+        profileName = findViewById(R.id.tvUserName);
+        profilePhone = findViewById(R.id.tvUserPhone);
+        profileRole = findViewById(R.id.tvUserRole);
 
-        // Get user data from intent
-        String userName = getIntent().getStringExtra("USER_NAME");
-        String userPhone = getIntent().getStringExtra("USER_PHONE");
+        auth = FirebaseAuth.getInstance();
+        String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
 
-        // Set user data to TextViews
-        tvUserName.setText(userName);
-        tvUserPhone.setText(userPhone);
+        if (uid == null) {
+            Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // Logout Button Click Listener
-        btnLogout.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            Intent intent = new Intent(ProfileActivity.this, RegLogChoice.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+        databaseReference = FirebaseDatabase.getInstance().getReference("users").child(uid);
+
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                MemberReg user = snapshot.getValue(MemberReg.class);
+                if (user != null) {
+                    profileName.setText("Name: " + user.getName());
+                    profilePhone.setText("Phone: " + user.getPhone());
+                    profileRole.setText("Role: " + user.getRole());
+                } else {
+                    Toast.makeText(ProfileActivity.this, "User data is null", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(ProfileActivity.this, "Failed to fetch data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
     }
 }

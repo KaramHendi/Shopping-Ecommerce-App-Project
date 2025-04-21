@@ -1,42 +1,40 @@
 package com.example.smartkartapp;
 
-import android.app.Activity;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class OrdersAdapter extends ArrayAdapter<Orders> {
-    private Activity context;
-    private List<Orders> orders;
 
-    public OrdersAdapter(Activity context, List<Orders> orders) {
-        super(context, R.layout.order_item_layout, orders);
+    private Context context;
+    private ArrayList<Orders> ordersList;
+
+    public OrdersAdapter(Context context, ArrayList<Orders> ordersList) {
+        super(context, 0, ordersList);
         this.context = context;
-        this.orders = orders;
+        this.ordersList = ordersList;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // Use convertView for efficient view recycling
         if (convertView == null) {
-            LayoutInflater inflater = context.getLayoutInflater();
-            convertView = inflater.inflate(R.layout.order_item_layout, parent, false);
+            convertView = LayoutInflater.from(context).inflate(R.layout.order_item_layout, parent, false);
         }
 
-        // Initialize the views
-        TextView orderDetails = convertView.findViewById(R.id.tvOrderDetails);
-        TextView orderPrice = convertView.findViewById(R.id.tvOrderPrice);
+        Orders currentOrder = ordersList.get(position);
 
-        // Get the order object
-        Orders order = orders.get(position);
+        TextView specTextView = convertView.findViewById(R.id.order_spec);
+        TextView priceTextView = convertView.findViewById(R.id.order_price);
+        TextView addressTextView = convertView.findViewById(R.id.order_address);
 
-        // Set the order details and price
-        orderDetails.setText("Order: " + order.getSpec());
-        orderPrice.setText("Price: $" + order.getPrice());  // Add currency formatting
+        specTextView.setText(currentOrder.getSpec());
+        priceTextView.setText(String.valueOf(currentOrder.getPrice()));
+        addressTextView.setText(currentOrder.getCustaddr());
 
         return convertView;
     }

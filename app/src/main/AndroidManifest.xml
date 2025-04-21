@@ -42,6 +42,10 @@
         <activity android:name=".LoginPage" />
         <activity android:name=".RegLogChoice" />
 
+        <!-- Add ProfileActivity here -->
+        <activity android:name=".ProfileActivity" />
+        <activity android:name=".OrderHistoryActivity" />
+
         <!-- MainActivity as entry point -->
         <activity
             android:name=".MainActivity"

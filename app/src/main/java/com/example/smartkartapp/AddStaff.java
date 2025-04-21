@@ -103,6 +103,7 @@ public class AddStaff extends AppCompatActivity {
                                                                 if (loginTask.isSuccessful()) {
                                                                     Intent intent = new Intent(AddStaff.this, AdminHomePage.class);
                                                                     intent.putExtra("CALLINGACTIVITY", "AddStaff");
+                                                                    intent.putExtra("USER_PHONE", phone);
                                                                     startActivity(intent);
                                                                     finish();
                                                                 } else {

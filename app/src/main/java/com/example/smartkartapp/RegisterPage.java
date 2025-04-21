@@ -18,6 +18,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class RegisterPage extends AppCompatActivity {
+
     EditText etname, etphone, etpass;
     Button register;
     FirebaseAuth mAuth;
@@ -49,6 +50,7 @@ public class RegisterPage extends AppCompatActivity {
         String password = etpass.getText().toString().trim();
         String role;
 
+        // Validate the input fields
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(phone) || TextUtils.isEmpty(password)) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
@@ -64,21 +66,21 @@ public class RegisterPage extends AppCompatActivity {
             return;
         }
 
-        // Check if the user is admin
+        // Determine the user's role
         if (name.equals("smartkart") && phone.equals("0587654321") && password.equals("appadmin123")) {
             role = "admin";
         } else {
-            // Check if phone is in the list of staff numbers from the database
+            // Check if the phone number belongs to a staff member
             if (isStaffPhoneNumber(phone)) {
                 role = "staff";
             } else {
-                // Default role for all others is "user"
-                role = "user";
+                role = "user"; // Default role
             }
         }
 
         register.setEnabled(false);
 
+        // Create the user with Firebase Authentication
         mAuth.createUserWithEmailAndPassword(phone + "@smartkart.com", password)
                 .addOnCompleteListener(task -> {
                     register.setEnabled(true);
@@ -86,15 +88,18 @@ public class RegisterPage extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
                             String uid = user.getUid();
-                            MemberReg member = new MemberReg(phone, name, password, phone, role);
+
+                            // Create the MemberReg object and save it to Firebase Database
+                            MemberReg member = new MemberReg(phone, name, password, role);
                             databaseUsers.child(uid).setValue(member)
                                     .addOnCompleteListener(dbTask -> {
                                         if (dbTask.isSuccessful()) {
                                             Toast.makeText(this, "Registered as " + role, Toast.LENGTH_SHORT).show();
 
+                                            // Pass user data to HomePageActivity
                                             Intent intent = new Intent(RegisterPage.this, HomePageActivity.class);
                                             intent.putExtra("USER_ROLE", role);  // Pass the user role
-                                            intent.putExtra("USER_ID", phone);      // Pass the user ID
+                                            intent.putExtra("USER_ID", phone);   // Pass the user ID
                                             intent.putExtra("CALLINGACTIVITY", "RegisterPage");
                                             startActivity(intent);
                                             finish();
@@ -109,7 +114,7 @@ public class RegisterPage extends AppCompatActivity {
                 });
     }
 
-    // Helper method to check if the phone number belongs to staff
+    // Helper method to check if the phone number belongs to a staff member
     private boolean isStaffPhoneNumber(final String phone) {
         final boolean[] isStaff = {false}; // Using an array to hold value from the async query
 

@@ -114,6 +114,5 @@ public class CurrentOrderStatus extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        startActivity(new Intent(CurrentOrderStatus.this, CurrentOrderStatus.class));
     }
 }
