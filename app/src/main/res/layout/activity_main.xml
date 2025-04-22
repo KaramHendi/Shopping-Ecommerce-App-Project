@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="24dp"
-    android:background="@drawable/background_image">
+    android:background="@drawable/appbackground">
 
     <!-- Logo -->
     <ImageView
@@ -23,11 +23,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Welcome to SmartKart"
-        android:textSize="24sp"
+        android:textSize="26sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
+        android:textColor="#212121"
         android:gravity="center"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:lineSpacingExtra="4dp" />
 
     <!-- Subtitle -->
     <TextView
@@ -35,7 +36,8 @@
         android:layout_height="wrap_content"
         android:text="Shop smart, shop easy!"
         android:textSize="16sp"
-        android:textColor="@color/gray"
+        android:textColor="#757575"
+        android:gravity="center"
         android:layout_marginBottom="40dp" />
 
     <!-- Get Started Button -->
@@ -47,9 +49,10 @@
         android:textAllCaps="false"
         android:backgroundTint="@color/primaryColor"
         android:textColor="@android:color/white"
-        android:paddingVertical="12dp"
-        android:layout_marginTop="12dp"
-        android:elevation="6dp"
-        android:background="@drawable/rounded_button" />
+        android:paddingVertical="14dp"
+        android:layout_marginTop="16dp"
+        android:elevation="8dp"
+        android:background="@drawable/rounded_button"
+        android:layout_gravity="center"/>
 
 </LinearLayout>

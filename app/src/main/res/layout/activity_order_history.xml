@@ -3,21 +3,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@drawable/appbackground"
+    android:scrollbars="vertical">
 
+    <!-- Title for Order History -->
     <TextView
         android:id="@+id/tvOrderHistoryTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Order History"
         android:textSize="24sp"
+        android:textColor="#FFEB3B"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        android:padding="12dp"
+        android:background="@drawable/rounded_title_background"/>
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" /> <!-- Initially hidden -->
 
+
+    <!-- ListView for Order History -->
     <ListView
         android:id="@+id/lvOrderHistory"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp"
-        />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="0.5dp"
+        android:clipToPadding="false"
+        android:padding="8dp"
+        android:background="@drawable/rounded_listview_background"
+        android:scrollingCache="true"/>
+
 </LinearLayout>

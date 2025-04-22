@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +22,7 @@ public class OrderHistoryActivity extends AppCompatActivity {
     private ListView lvOrderHistory;
     private ArrayList<Orders> orderList;
     private OrdersAdapter ordersAdapter;
+    private ProgressBar progressBar;  // For showing a loading indicator
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,8 @@ public class OrderHistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_order_history);
 
         lvOrderHistory = findViewById(R.id.lvOrderHistory);
+        progressBar = findViewById(R.id.progressBar);  // Initialize progress bar
+
         orderList = new ArrayList<>();
         ordersAdapter = new OrdersAdapter(this, orderList);
         lvOrderHistory.setAdapter(ordersAdapter);
@@ -70,22 +74,40 @@ public class OrderHistoryActivity extends AppCompatActivity {
     private void fetchUserOrders(String uid) {
         DatabaseReference userOrdersRef = FirebaseDatabase.getInstance().getReference("userOrders").child(uid);
 
+        // Show loading indicator while fetching data
+        progressBar.setVisibility(ProgressBar.VISIBLE);
+
         userOrdersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                orderList.clear();
-                for (DataSnapshot orderSnap : snapshot.getChildren()) {
-                    Orders order = orderSnap.getValue(Orders.class);
-                    if (order != null) {
-                        orderList.add(order);
+                orderList.clear(); // Clear any previous orders
+
+                if (snapshot.exists()) {
+                    for (DataSnapshot orderSnap : snapshot.getChildren()) {
+                        Orders order = orderSnap.getValue(Orders.class);
+                        if (order != null) {
+                            orderList.add(order);
+                        }
                     }
+
+                    // Check if orders list is empty
+                    if (orderList.isEmpty()) {
+                        Toast.makeText(OrderHistoryActivity.this, "No orders found.", Toast.LENGTH_SHORT).show();
+                    }
+
+                    ordersAdapter.notifyDataSetChanged();  // Update the adapter with the new data
+                } else {
+                    Toast.makeText(OrderHistoryActivity.this, "No orders found for this user.", Toast.LENGTH_SHORT).show();
                 }
-                ordersAdapter.notifyDataSetChanged();
+
+                // Hide the loading indicator once data is loaded
+                progressBar.setVisibility(ProgressBar.GONE);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(OrderHistoryActivity.this, "Failed to load orders: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(ProgressBar.GONE);  // Hide loading indicator on error
             }
         });
     }

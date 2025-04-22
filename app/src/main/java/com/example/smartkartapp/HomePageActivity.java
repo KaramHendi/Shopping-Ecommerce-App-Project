@@ -13,6 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,6 +25,7 @@ public class HomePageActivity extends AppCompatActivity
     String userRole, userId, userName, userPhone;
 
     private DrawerLayout drawerLayout;
+    private FloatingActionButton contactStaffFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +34,6 @@ public class HomePageActivity extends AppCompatActivity
         // Check if the user is logged in
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
-            // If user is not logged in, redirect to login page
             Intent intent = new Intent(HomePageActivity.this, RegLogChoice.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -64,19 +65,20 @@ public class HomePageActivity extends AppCompatActivity
         books = findViewById(R.id.books);
         otherItems = findViewById(R.id.otherItems);
 
-        // Get data from intent safely
+        // FloatingActionButton to contact staff
+        contactStaffFab = findViewById(R.id.fab);
+
+        // Get intent data
         userRole = getIntent().getStringExtra("USER_ROLE");
         userId = getIntent().getStringExtra("USER_ID");
         userName = getIntent().getStringExtra("USER_NAME");
         userPhone = getIntent().getStringExtra("USER_PHONE");
 
-        // Validate data (fall back to default if any data is missing)
         if (userRole == null) userRole = "user";
         if (userId == null) userId = "";
         if (userName == null) userName = "Guest";
         if (userPhone == null) userPhone = "N/A";
 
-        // Role-based welcome message
         switch (userRole) {
             case "admin":
                 Toast.makeText(this, "Welcome Admin", Toast.LENGTH_SHORT).show();
@@ -92,11 +94,21 @@ public class HomePageActivity extends AppCompatActivity
                 break;
         }
 
-        // Set category button listeners
+        // Set category listeners
         clothing.setOnClickListener(v -> navigateToCategoryActivity(Clothing.class));
         electronics.setOnClickListener(v -> navigateToCategoryActivity(Electronics.class));
         books.setOnClickListener(v -> navigateToCategoryActivity(Books.class));
         otherItems.setOnClickListener(v -> navigateToCategoryActivity(OtherItems.class));
+
+        // FAB listener
+        contactStaffFab.setOnClickListener(v -> {
+            Intent intent = new Intent(HomePageActivity.this, SendMessageActivity.class);
+            intent.putExtra("USER_ID", userId);
+            intent.putExtra("USER_NAME", userName);
+            intent.putExtra("USER_PHONE", userPhone);
+            intent.putExtra("USER_ROLE", userRole);
+            startActivity(intent);
+        });
     }
 
     private void navigateToCategoryActivity(Class<?> targetActivity) {
@@ -122,7 +134,7 @@ public class HomePageActivity extends AppCompatActivity
         } else if (id == R.id.nav_order_history) {
             Intent historyIntent = new Intent(this, OrderHistoryActivity.class);
             historyIntent.putExtra("USER_ROLE", userRole);
-            historyIntent.putExtra("USER_PHONE", userPhone); // Pass correct phone
+            historyIntent.putExtra("USER_PHONE", userPhone);
             historyIntent.putExtra("USER_ID", userId);
             startActivity(historyIntent);
         } else if (id == R.id.nav_logout) {

@@ -28,9 +28,9 @@ public class LoginPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
 
-        etphone = findViewById(R.id.logphone);
-        etpass = findViewById(R.id.logpass);
-        loginButton = findViewById(R.id.btnlogin);
+        etphone = findViewById(R.id.editTextPhoneNumber);
+        etpass = findViewById(R.id.editTextPassword);
+        loginButton = findViewById(R.id.btnLogin);
 
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference("users");

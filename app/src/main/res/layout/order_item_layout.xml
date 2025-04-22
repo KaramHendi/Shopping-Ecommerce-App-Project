@@ -2,27 +2,37 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp"
-    android:orientation="vertical">
+    android:padding="16dp"
+    android:background="@drawable/card_background"
+    android:layout_marginBottom="16dp"
+    android:elevation="4dp"
+    android:orientation="vertical"
+    android:layout_gravity="center">
 
     <TextView
         android:id="@+id/order_spec"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Item Spec"
-        android:textSize="16sp"/>
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/order_price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Price"
-        android:textSize="14sp"/>
+        android:textSize="14sp"
+        android:textColor="@color/primaryColor"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/order_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Address"
-        android:textSize="14sp"/>
+        android:textSize="14sp"
+        android:textColor="@color/gray"/>
 </LinearLayout>

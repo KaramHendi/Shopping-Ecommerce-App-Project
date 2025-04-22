@@ -9,44 +9,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- All your activities -->
-        <activity android:name=".About" />
-        <activity android:name=".AddStock" />
-        <activity android:name=".Shoes" />
-        <activity android:name=".BottomWear" />
-        <activity android:name=".Formals" />
-        <activity android:name=".tShirts" />
-        <activity android:name=".DisplayItem" />
-        <activity android:name=".WomensClothing" />
-        <activity android:name=".MensClothing" />
-        <activity android:name=".OtherItems" />
-        <activity android:name=".Books" />
-        <activity android:name=".Electronics" />
-        <activity android:name=".Clothing" />
-        <activity android:name=".CurrentOrderStatus" />
-        <activity android:name=".AcceptOrders" />
-        <activity android:name=".AddStaff" />
-        <activity android:name=".PlaceOrder" />
-        <activity android:name=".StaffLogin" />
-        <activity android:name=".StaffHomePage" />
-        <activity android:name=".AdminHomePage" />
-        <activity android:name=".AdminLogin" />
-
-        <!-- HomePageActivity updated with the correct theme -->
-        <activity
-            android:name=".HomePageActivity"
-            android:label="@string/title_activity_home_page"
-            android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity android:name=".RegisterPage" />
-        <activity android:name=".LoginPage" />
-        <activity android:name=".RegLogChoice" />
-
-        <!-- Add ProfileActivity here -->
-        <activity android:name=".ProfileActivity" />
-        <activity android:name=".OrderHistoryActivity" />
-
-        <!-- MainActivity as entry point -->
+        <!-- Entry point -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -55,6 +18,52 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Auth Screens -->
+        <activity android:name=".RegisterPage" />
+        <activity android:name=".LoginPage" />
+        <activity android:name=".RegLogChoice" />
+        <activity android:name=".AdminLogin" />
+        <activity android:name=".StaffLogin" />
+
+        <!-- Home & Role-based Dashboards -->
+        <activity
+            android:name=".HomePageActivity"
+            android:label="@string/title_activity_home_page"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".AdminHomePage" />
+        <activity android:name=".StaffHomePage" />
+
+        <!-- Order Management -->
+        <activity android:name=".PlaceOrder" />
+        <activity android:name=".AcceptOrders" />
+        <activity android:name=".CurrentOrderStatus" />
+        <activity android:name=".OrderHistoryActivity" />
+
+        <!-- Stock Management -->
+        <activity android:name=".AddStock" />
+        <activity android:name=".AddStaff" />
+
+        <!-- Product Categories -->
+        <activity android:name=".DisplayItem" />
+        <activity android:name=".Clothing" />
+        <activity android:name=".MensClothing" />
+        <activity android:name=".WomensClothing" />
+        <activity android:name=".tShirts" />
+        <activity android:name=".Formals" />
+        <activity android:name=".BottomWear" />
+        <activity android:name=".Shoes" />
+        <activity android:name=".Books" />
+        <activity android:name=".Electronics" />
+        <activity android:name=".OtherItems" />
+        <activity android:name=".SendMessageActivity" />
+
+
+        <!-- Extra Pages -->
+        <activity android:name=".ProfileActivity" />
+        <activity android:name=".About" />
+        <activity android:name=".ViewMessagesActivity" /> <!-- ✅ Newly added -->
+
     </application>
 
 </manifest>

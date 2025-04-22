@@ -4,29 +4,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="24dp"
+    android:background="@drawable/appbackground"
     tools:context=".StaffHomePage">
 
-    <Button
+    <!-- Accept Orders Button -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/accpet_orders"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Accept Orders to Deliver"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.467"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="📦 Accept Orders"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.244" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/view_messages"
+        app:layout_constraintVertical_bias="0.3" />
 
-    <Button
-        android:id="@+id/current_order_status"
-        android:layout_width="wrap_content"
+    <!-- View Messages Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/view_messages"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Check Current Order Status"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.467"
+        android:text="💬 View Messages"
+        app:layout_constraintTop_toBottomOf="@id/accpet_orders"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.613" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/current_order_status"
+        app:layout_constraintVertical_bias="0.4" />
+
+    <!-- Current Order Status Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/current_order_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="🚚 Order Status"
+        app:layout_constraintTop_toBottomOf="@id/view_messages"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

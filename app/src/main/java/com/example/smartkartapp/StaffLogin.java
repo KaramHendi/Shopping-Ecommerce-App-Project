@@ -105,8 +105,8 @@ public class StaffLogin extends AppCompatActivity {
                 }
 
                 if (!isBusy) {
-                    stfstatus.setText("No current delivery. Redirecting to Accept Orders...");
-                    Intent intent = new Intent(StaffLogin.this, AcceptOrders.class);
+                    stfstatus.setText("No current delivery. Redirecting to StaffHomePage...");
+                    Intent intent = new Intent(StaffLogin.this, StaffHomePage.class);
                     intent.putExtra("STAFFNAME", staffName);
                     intent.putExtra("STAFFPASSWORD", password);
                     startActivity(intent);
