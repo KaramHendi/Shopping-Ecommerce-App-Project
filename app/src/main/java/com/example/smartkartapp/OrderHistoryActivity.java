@@ -1,13 +1,14 @@
 package com.example.smartkartapp;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.ListView;
-import android.widget.Toast;
+import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -19,22 +20,23 @@ import java.util.ArrayList;
 
 public class OrderHistoryActivity extends AppCompatActivity {
 
-    private ListView lvOrderHistory;
-    private ArrayList<Orders> orderList;
+    private RecyclerView recyclerView;
     private OrdersAdapter ordersAdapter;
-    private ProgressBar progressBar;  // For showing a loading indicator
+    private ArrayList<Orders> orderList;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_history);
 
-        lvOrderHistory = findViewById(R.id.lvOrderHistory);
-        progressBar = findViewById(R.id.progressBar);  // Initialize progress bar
+        recyclerView = findViewById(R.id.ordersRecyclerView);
+        progressBar = findViewById(R.id.progressBar); // Ensure it's defined in XML
 
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         orderList = new ArrayList<>();
         ordersAdapter = new OrdersAdapter(this, orderList);
-        lvOrderHistory.setAdapter(ordersAdapter);
+        recyclerView.setAdapter(ordersAdapter);
 
         String userPhone = getIntent().getStringExtra("USER_PHONE");
 
@@ -55,7 +57,6 @@ public class OrderHistoryActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     for (DataSnapshot userSnap : snapshot.getChildren()) {
                         String uid = userSnap.getKey();
-                        Log.d("OrderHistory", "User found with UID: " + uid);
                         fetchUserOrders(uid);
                         return;
                     }
@@ -74,40 +75,41 @@ public class OrderHistoryActivity extends AppCompatActivity {
     private void fetchUserOrders(String uid) {
         DatabaseReference userOrdersRef = FirebaseDatabase.getInstance().getReference("userOrders").child(uid);
 
-        // Show loading indicator while fetching data
-        progressBar.setVisibility(ProgressBar.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
 
         userOrdersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                orderList.clear(); // Clear any previous orders
+                orderList.clear();
 
                 if (snapshot.exists()) {
                     for (DataSnapshot orderSnap : snapshot.getChildren()) {
                         Orders order = orderSnap.getValue(Orders.class);
                         if (order != null) {
+                            // Optional: Set default or dummy status if missing
+                            if (order.getStatus() == null || order.getStatus().isEmpty()) {
+                                order.setStatus("Ongoing");  // fallback
+                            }
                             orderList.add(order);
                         }
                     }
 
-                    // Check if orders list is empty
                     if (orderList.isEmpty()) {
                         Toast.makeText(OrderHistoryActivity.this, "No orders found.", Toast.LENGTH_SHORT).show();
                     }
 
-                    ordersAdapter.notifyDataSetChanged();  // Update the adapter with the new data
+                    ordersAdapter.notifyDataSetChanged();
                 } else {
                     Toast.makeText(OrderHistoryActivity.this, "No orders found for this user.", Toast.LENGTH_SHORT).show();
                 }
 
-                // Hide the loading indicator once data is loaded
-                progressBar.setVisibility(ProgressBar.GONE);
+                progressBar.setVisibility(View.GONE);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(OrderHistoryActivity.this, "Failed to load orders: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(ProgressBar.GONE);  // Hide loading indicator on error
+                progressBar.setVisibility(View.GONE);
             }
         });
     }

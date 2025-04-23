@@ -88,7 +88,8 @@ public class PlaceOrder extends AppCompatActivity {
                                 databaseStocks.child(stockReg.getId()).child("currentStockAvailaible").setValue(curr);
 
                                 String orderId = databaseOrders.push().getKey();
-                                Orders order = new Orders(orderId, itemDetails, custName, custPhone, address, custPass, itemPrice);
+                                // Add pending status
+                                Orders order = new Orders(orderId, itemDetails, custName, custPhone, address, custPass, itemPrice, "pending");
 
                                 // Save order in orders node
                                 databaseOrders.child(orderId).setValue(order).addOnCompleteListener(task -> {

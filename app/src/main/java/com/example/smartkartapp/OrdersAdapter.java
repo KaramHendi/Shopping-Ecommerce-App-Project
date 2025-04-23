@@ -1,41 +1,71 @@
 package com.example.smartkartapp;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
+import java.util.List;
 
-public class OrdersAdapter extends ArrayAdapter<Orders> {
+public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewHolder> {
 
     private Context context;
-    private ArrayList<Orders> ordersList;
+    private List<Orders> ordersList;
 
-    public OrdersAdapter(Context context, ArrayList<Orders> ordersList) {
-        super(context, 0, ordersList);
+    public OrdersAdapter(Context context, List<Orders> ordersList) {
         this.context = context;
         this.ordersList = ordersList;
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.order_item_layout, parent, false);
+    public OrderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.order_item_layout, parent, false);
+        return new OrderViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
+        Orders order = ordersList.get(position);
+
+        holder.specTextView.setText("Item: " + order.getSpec());
+        holder.priceTextView.setText("Price: ₹" + order.getPrice());
+        holder.addressTextView.setText("Address: " + order.getCustaddr());
+
+        String status = order.getStatus() != null ? order.getStatus().toLowerCase() : "unknown";
+        switch (status) {
+            case "pending":
+                holder.statusTextView.setText("Status: Ongoing");
+                holder.statusTextView.setTextColor(Color.parseColor("#FFA000")); // Amber
+                break;
+            case "completed":
+                holder.statusTextView.setText("Status: Completed");
+                holder.statusTextView.setTextColor(Color.parseColor("#388E3C")); // Green
+                break;
+            default:
+                holder.statusTextView.setText("Status: Unknown");
+                holder.statusTextView.setTextColor(Color.GRAY);
         }
+    }
 
-        Orders currentOrder = ordersList.get(position);
+    @Override
+    public int getItemCount() {
+        return ordersList.size();
+    }
 
-        TextView specTextView = convertView.findViewById(R.id.order_spec);
-        TextView priceTextView = convertView.findViewById(R.id.order_price);
-        TextView addressTextView = convertView.findViewById(R.id.order_address);
+    public static class OrderViewHolder extends RecyclerView.ViewHolder {
+        TextView specTextView, priceTextView, addressTextView, statusTextView;
 
-        specTextView.setText(currentOrder.getSpec());
-        priceTextView.setText(String.valueOf(currentOrder.getPrice()));
-        addressTextView.setText(currentOrder.getCustaddr());
-
-        return convertView;
+        public OrderViewHolder(@NonNull View itemView) {
+            super(itemView);
+            specTextView = itemView.findViewById(R.id.order_spec);
+            priceTextView = itemView.findViewById(R.id.order_price);
+            addressTextView = itemView.findViewById(R.id.order_address);
+            statusTextView = itemView.findViewById(R.id.tvOrderStatus);
+        }
     }
 }

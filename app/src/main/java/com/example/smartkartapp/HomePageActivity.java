@@ -74,11 +74,13 @@ public class HomePageActivity extends AppCompatActivity
         userName = getIntent().getStringExtra("USER_NAME");
         userPhone = getIntent().getStringExtra("USER_PHONE");
 
+        // Default values for null cases
         if (userRole == null) userRole = "user";
         if (userId == null) userId = "";
         if (userName == null) userName = "Guest";
         if (userPhone == null) userPhone = "N/A";
 
+        // Display welcome message based on role
         switch (userRole) {
             case "admin":
                 Toast.makeText(this, "Welcome Admin", Toast.LENGTH_SHORT).show();

@@ -35,4 +35,14 @@
         android:text="Address"
         android:textSize="14sp"
         android:textColor="@color/gray"/>
+    <TextView
+        android:id="@+id/tvOrderStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="16sp"
+        android:layout_marginTop="4dp"/>
+
+
 </LinearLayout>
