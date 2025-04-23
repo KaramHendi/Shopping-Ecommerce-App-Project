@@ -1,7 +1,7 @@
 package com.example.smartkartapp;
 
 import android.os.Bundle;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,48 +12,49 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+
 public class ViewMessagesActivity extends AppCompatActivity {
-    TextView messagesTextView;
+    ListView messagesListView;
     DatabaseReference messagesRef;
+    ArrayList<String> messagesList;
+    ArrayList<String> messageKeys;
+    MessageAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_messages);
 
-        messagesTextView = findViewById(R.id.messagesTextView);
+        messagesListView = findViewById(R.id.messagesListView);
+        messagesList = new ArrayList<>();
+        messageKeys = new ArrayList<>();
 
-        // Initialize Firebase reference to the "messages" node
+        adapter = new MessageAdapter(this, messagesList, messageKeys);
+        messagesListView.setAdapter(adapter);
+
         messagesRef = FirebaseDatabase.getInstance().getReference("messages");
-
-        // Fetch messages from Firebase Realtime Database
         fetchMessages();
     }
 
     private void fetchMessages() {
-        // Attach a listener to read the messages
         messagesRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                StringBuilder messages = new StringBuilder();
+            public void onDataChange(DataSnapshot snapshot) {
+                messagesList.clear();
+                messageKeys.clear();
 
-                // Loop through all the messages in the database
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    String message = snapshot.getValue(String.class);  // Assuming each message is a simple String
-                    messages.append(message).append("\n");
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    String message = child.getValue(String.class);
+                    messagesList.add(message);
+                    messageKeys.add(child.getKey());
                 }
 
-                // Set the messages to the TextView
-                if (messages.length() > 0) {
-                    messagesTextView.setText(messages.toString());
-                } else {
-                    messagesTextView.setText("No messages available.");
-                }
+                adapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // Show an error message if the database read fails
+            public void onCancelled(DatabaseError error) {
                 Toast.makeText(ViewMessagesActivity.this, "Failed to load messages", Toast.LENGTH_SHORT).show();
             }
         });

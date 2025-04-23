@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 public class AdminHomePage extends AppCompatActivity {
-Button addStaff,addStock;
+    Button addStaff,addStock;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

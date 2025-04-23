@@ -21,7 +21,6 @@ public class StaffHomePage extends AppCompatActivity {
         Toast.makeText(this, "Welcome, " + currentStaffName + "!", Toast.LENGTH_SHORT).show();
 
         acOrd = findViewById(R.id.accpet_orders);
-        currentOrderStatus = findViewById(R.id.current_order_status);
         viewMessages = findViewById(R.id.view_messages); // New button for viewing messages
 
         acOrd.setOnClickListener(v -> {
@@ -31,12 +30,6 @@ public class StaffHomePage extends AppCompatActivity {
             startActivity(i);
         });
 
-        currentOrderStatus.setOnClickListener(v -> {
-            Intent i = new Intent(StaffHomePage.this, CurrentOrderStatus.class);
-            i.putExtra("STAFFNAME", currentStaffName);
-            i.putExtra("STAFFPASSWORD", currentStaffPassword);
-            startActivity(i);
-        });
 
         // On click for viewing messages from users
         viewMessages.setOnClickListener(v -> {

@@ -32,7 +32,11 @@
             android:label="@string/title_activity_home_page"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".AdminHomePage" />
-        <activity android:name=".StaffHomePage" />
+
+        <activity
+            android:name=".StaffHomePage"
+            android:theme="@style/SendMessageTheme" />
+
 
         <!-- Order Management -->
         <activity android:name=".PlaceOrder" />
@@ -56,7 +60,9 @@
         <activity android:name=".Books" />
         <activity android:name=".Electronics" />
         <activity android:name=".OtherItems" />
-        <activity android:name=".SendMessageActivity" />
+        <activity
+            android:name=".SendMessageActivity"
+            android:theme="@style/SendMessageTheme" />
 
 
         <!-- Extra Pages -->

@@ -141,6 +141,6 @@ public class AcceptOrders extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        startActivity(new Intent(AcceptOrders.this, RegLogChoice.class));
+        startActivity(new Intent(AcceptOrders.this, StaffHomePage.class));
     }
 }

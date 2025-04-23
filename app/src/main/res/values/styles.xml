@@ -1,54 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- App theme using Material Components -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Customize your theme here -->
+    <!-- Your existing AppCompat theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <!-- Style for activities without action bar -->
-    <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
-    <resources>
 
-        <!-- App theme using Material Components -->
-        <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-            <!-- Customize your theme here -->
-            <item name="colorPrimary">@color/colorPrimary</item>
-            <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-            <item name="colorAccent">@color/colorAccent</item>
-            <item name="colorSurface">@color/colorBackground</item> <!-- Surface color -->
-            <item name="colorBackground">@color/colorBackground</item> <!-- Background color -->
-            <item name="colorError">@color/colorError</item> <!-- Error color -->
-            <item name="android:textColorPrimary">@color/colorOnBackground</item> <!-- Primary text color -->
-            <item name="android:textColorSecondary">@color/colorOnSurface</item> <!-- Secondary text color -->
-        </style>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-        <!-- Style for activities without action bar -->
-        <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-            <item name="windowActionBar">false</item>
-            <item name="windowNoTitle">true</item>
-            <item name="android:statusBarColor">@android:color/transparent</item>
-        </style>
+    <!-- MaterialComponents “message” theme for SendMessageActivity -->
+    <style name="SendMessageTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Core brand colors -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
 
-        <!-- AppBar style (overlay for action bar) -->
-        <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+        <!-- Material surface & background -->
 
-        <!-- Popup overlay style -->
-        <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
-
-    </resources>
-
-    <!-- AppBar style (overlay for action bar) -->
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
-
-    <!-- Popup overlay style -->
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+    </style>
 
 </resources>
-
