@@ -54,4 +54,15 @@
         android:textColor="@android:color/white"
         android:background="@color/primaryColor"
         android:layout_marginTop="8dp"/>
+
+    <!-- Remove Order Button -->
+    <Button
+        android:id="@+id/btnRemoveOrder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Remove Order"
+        android:textColor="@android:color/white"
+        android:background="@android:color/holo_red_dark"
+        android:layout_marginTop="8dp"/>
+
 </LinearLayout>

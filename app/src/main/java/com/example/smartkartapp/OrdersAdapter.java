@@ -11,6 +11,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.List;
 
 public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewHolder> {
@@ -18,7 +22,6 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
     private List<Orders> orderList;
     private Context context;
 
-    // Constructor that also accepts Context
     public OrdersAdapter(List<Orders> orderList, Context context) {
         this.orderList = orderList;
         this.context = context;
@@ -39,9 +42,8 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
         holder.orderStatus.setText("Status: " + order.getStatus());
         holder.orderAddress.setText("Address: " + order.getCustaddr());
 
-        // Set up "Order Again" button click listener
+        // Order Again button
         holder.orderAgainBtn.setOnClickListener(v -> {
-            // Your logic to place the order again, you can call the PlaceOrder activity or any relevant logic
             Intent intent = new Intent(context, PlaceOrder.class);
             intent.putExtra("CUSTNAME", order.getCustname());
             intent.putExtra("CUSTPH", order.getCustphone());
@@ -49,6 +51,21 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
             intent.putExtra("ITEMDET", order.getSpec());
             intent.putExtra("item_price", order.getPrice());
             context.startActivity(intent);
+        });
+
+        // Delete Order button
+        holder.removeOrderBtn.setOnClickListener(v -> {
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            String orderId = order.getId();
+
+            DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+            rootRef.child("userOrders").child(userId).child(orderId).removeValue();
+            rootRef.child("orders").child(orderId).removeValue();
+            rootRef.child("deliverorder").child(orderId).removeValue(); // <- also remove from deliverorder
+
+            orderList.remove(position);
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position, orderList.size());
         });
     }
 
@@ -58,9 +75,8 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
     }
 
     public static class OrderViewHolder extends RecyclerView.ViewHolder {
-
         TextView orderSpec, orderPrice, orderStatus, orderAddress;
-        Button orderAgainBtn; // "Order Again" button
+        Button orderAgainBtn, removeOrderBtn;
 
         public OrderViewHolder(View itemView) {
             super(itemView);
@@ -68,7 +84,8 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
             orderPrice = itemView.findViewById(R.id.order_price);
             orderStatus = itemView.findViewById(R.id.tvOrderStatus);
             orderAddress = itemView.findViewById(R.id.order_address);
-            orderAgainBtn = itemView.findViewById(R.id.btnOrderAgain);  // Link to the button in your layout
+            orderAgainBtn = itemView.findViewById(R.id.btnOrderAgain);
+            removeOrderBtn = itemView.findViewById(R.id.btnRemoveOrder);
         }
     }
 }
