@@ -35,7 +35,7 @@ public class PlaceOrder extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_order);
 
-        // UI elements
+        // UI elements initialization
         cname = findViewById(R.id.custname);
         cphone = findViewById(R.id.custphone);
         ordspec = findViewById(R.id.itemdet);
@@ -44,9 +44,10 @@ public class PlaceOrder extends AppCompatActivity {
         ordError = findViewById(R.id.ordError);
         plord = findViewById(R.id.btnplord);
 
+        // Clear previous error messages
         ordError.setText("");
 
-        // Get intent extras
+        // Retrieve data passed through the Intent
         custName = getIntent().getStringExtra("CUSTNAME");
         custPhone = getIntent().getStringExtra("CUSTPH");
         custPass = getIntent().getStringExtra("CUSTPASS");
@@ -59,10 +60,11 @@ public class PlaceOrder extends AppCompatActivity {
         ordspec.setText(itemDetails);
         ordprice.setText(String.valueOf(itemPrice));
 
-        // Firebase references
+        // Firebase database references
         databaseOrders = FirebaseDatabase.getInstance().getReference("orders");
         databaseStocks = FirebaseDatabase.getInstance().getReference("stocks");
 
+        // Button click to place the order
         plord.setOnClickListener(v -> {
             String address = addr.getText().toString().trim();
             if (TextUtils.isEmpty(address)) {
@@ -81,28 +83,29 @@ public class PlaceOrder extends AppCompatActivity {
 
                         if (stockReg != null && stockReg.getItemName().equalsIgnoreCase(itemDetails)) {
                             itemFound = true;
-                            int curr = stockReg.getCurrentStockAvailaible();
+                            int currentStock = stockReg.getCurrentStockAvailaible();
 
-                            if (curr > 0) {
-                                curr--;
-                                databaseStocks.child(stockReg.getId()).child("currentStockAvailaible").setValue(curr);
+                            if (currentStock > 0) {
+                                currentStock--;
+                                // Update stock availability in the database
+                                databaseStocks.child(stockReg.getId()).child("currentStockAvailaible").setValue(currentStock);
 
+                                // Create a new order
                                 String orderId = databaseOrders.push().getKey();
-                                // Add pending status
                                 Orders order = new Orders(orderId, itemDetails, custName, custPhone, address, custPass, itemPrice, "pending");
 
-                                // Save order in orders node
+                                // Save the order in the "orders" node
                                 databaseOrders.child(orderId).setValue(order).addOnCompleteListener(task -> {
                                     if (task.isSuccessful()) {
-                                        // Save under userOrders as well
+                                        // Save order under userOrders as well
                                         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                                         FirebaseDatabase.getInstance().getReference("userOrders")
                                                 .child(uid).child(orderId).setValue(order);
 
-                                        showToast("Order placed successfully");
+                                        showToast("Order placed successfully!");
                                         goToHome();
                                     } else {
-                                        showToast("Failed to place order");
+                                        showToast("Failed to place order. Please try again later.");
                                     }
                                 });
                             } else {
@@ -119,7 +122,7 @@ public class PlaceOrder extends AppCompatActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-                    showToast("Database Error: " + databaseError.getMessage());
+                    showToast("Database error: " + databaseError.getMessage());
                 }
             });
         });
@@ -130,6 +133,7 @@ public class PlaceOrder extends AppCompatActivity {
     }
 
     private void goToHome() {
+        // Redirect to the Home Page Activity after successful order placement
         Intent intent = new Intent(PlaceOrder.this, HomePageActivity.class);
         intent.putExtra("NAME", custName);
         intent.putExtra("PHONE", custPhone);
@@ -141,6 +145,7 @@ public class PlaceOrder extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        // Handle back press, ensuring the user can navigate back to the previous screen with the right data
         Intent intent = new Intent(PlaceOrder.this, DisplayItem.class);
         intent.putExtra("NAME", custName);
         intent.putExtra("PHONE", custPhone);

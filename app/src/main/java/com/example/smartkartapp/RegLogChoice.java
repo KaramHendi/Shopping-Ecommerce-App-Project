@@ -139,6 +139,6 @@ public class RegLogChoice extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // Do nothing, or add custom behavior if needed
+        super.onBackPressed();  // Allow back button functionality
     }
 }

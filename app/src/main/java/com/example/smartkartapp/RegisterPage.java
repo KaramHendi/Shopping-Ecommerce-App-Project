@@ -48,7 +48,6 @@ public class RegisterPage extends AppCompatActivity {
         String name = etname.getText().toString().trim();
         String phone = etphone.getText().toString().trim();
         String password = etpass.getText().toString().trim();
-        String role;
 
         // Validate the input fields
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(phone) || TextUtils.isEmpty(password)) {
@@ -66,18 +65,40 @@ public class RegisterPage extends AppCompatActivity {
             return;
         }
 
-        // Determine the user's role
+        // Determine the user's role asynchronously
+        assignUserRole(phone, name, password);
+    }
+
+    private void assignUserRole(final String phone, final String name, final String password) {
+        // Initialize default role
+        String role;
+
+        // Check if the user is an admin
         if (name.equals("smartkart") && phone.equals("0587654321") && password.equals("appadmin123")) {
             role = "admin";
+            registerUserInFirebase(phone, name, password, role);
         } else {
             // Check if the phone number belongs to a staff member
-            if (isStaffPhoneNumber(phone)) {
-                role = "staff";
-            } else {
-                role = "user"; // Default role
-            }
+            checkIfStaff(phone, name, password);
         }
+    }
 
+    private void checkIfStaff(final String phone, final String name, final String password) {
+        databaseUsers.orderByChild("phone").equalTo(phone).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String role = dataSnapshot.exists() ? "staff" : "user";
+                registerUserInFirebase(phone, name, password, role);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(RegisterPage.this, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void registerUserInFirebase(String phone, String name, String password, String role) {
         register.setEnabled(false);
 
         // Create the user with Firebase Authentication
@@ -112,28 +133,5 @@ public class RegisterPage extends AppCompatActivity {
                         Toast.makeText(this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
-    }
-
-    // Helper method to check if the phone number belongs to a staff member
-    private boolean isStaffPhoneNumber(final String phone) {
-        final boolean[] isStaff = {false}; // Using an array to hold value from the async query
-
-        // Query the Firebase database for users with the same phone number
-        databaseUsers.orderByChild("phone").equalTo(phone).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    isStaff[0] = true; // If the phone number exists, it's a staff number
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(RegisterPage.this, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Return the result after the Firebase query completes
-        return isStaff[0];
     }
 }
