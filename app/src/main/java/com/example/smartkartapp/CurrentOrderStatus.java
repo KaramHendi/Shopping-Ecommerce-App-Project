@@ -56,7 +56,7 @@ public class CurrentOrderStatus extends AppCompatActivity {
                         String details = "NAME:" + order.getName() +
                                 "\nPHONE:" + order.getPhone() +
                                 "\nADDRESS:" + order.getAddress() +
-                                "\nORDER DETAILS:" + order.getPrice() +
+                                "\nORDER DETAILS:" + order.getOrderDetails() +
                                 "\nPRICE:" + order.getPrice();
 
                         deliveryKeys[i] = deliverySnap.getKey();
@@ -101,13 +101,37 @@ public class CurrentOrderStatus extends AppCompatActivity {
     }
 
     private void markAsDelivered() {
+        DatabaseReference ordersRef = FirebaseDatabase.getInstance().getReference("orders");
+        DatabaseReference userOrdersRef = FirebaseDatabase.getInstance().getReference("userOrders");
+
         for (String key : deliveryKeys) {
             if (key != null) {
+                // Remove from deliverOrder
                 databaseDeliveries.child(key).removeValue();
+
+                // Update status in orders
+                ordersRef.child(key).child("status").setValue("delivered");
+
+                // Update status in userOrders
+                userOrdersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot userSnap : snapshot.getChildren()) {
+                            if (userSnap.hasChild(key)) {
+                                userSnap.getRef().child(key).child("status").setValue("delivered");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(CurrentOrderStatus.this, "Failed to update user order status", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         }
 
-        Toast.makeText(this, "Order status updated to Pending Confirmation", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Order status updated to Delivered", Toast.LENGTH_SHORT).show();
         startActivity(new Intent(CurrentOrderStatus.this, AcceptOrders.class));
         finish();
     }
