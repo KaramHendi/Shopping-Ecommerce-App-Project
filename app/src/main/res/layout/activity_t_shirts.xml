@@ -4,16 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="8dp"
-    android:background="@color/lightGrayColor"
+    android:padding="16dp"
+    android:background="@drawable/appbackground"
     tools:context=".tShirts">
 
+    <!-- Image Banner or Header -->
+    <ImageView
+        android:id="@+id/bannerImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/applogo_"
+        android:scaleType="centerCrop"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="Banner Image"/>
+
+    <!-- RecyclerView for Products/Books -->
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvBooks"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/rvTShirts"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bannerImage"
+        android:layout_marginTop="8dp"
+        android:paddingBottom="16dp"
+        android:clipToPadding="false"
         android:scrollbars="vertical"
-        ></androidx.recyclerview.widget.RecyclerView>
+        android:background="@android:color/darker_gray"
+        android:elevation="8dp"
+        android:layout_centerHorizontal="true"
+        android:overScrollMode="never"/>
 
 </RelativeLayout>

@@ -18,7 +18,7 @@ public class OtherItems extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_t_shirts);
-        recyclerView=findViewById(R.id.rvTShirts);
+        recyclerView=findViewById(R.id.rvBooks);
         final String sna=getIntent().getStringExtra("NAME");
         final String sph=getIntent().getStringExtra("PHONE");
         final String spa=getIntent().getStringExtra("PASSWORD");

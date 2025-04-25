@@ -1,43 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="wrap_content"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp"
-    android:elevation="12dp">
+    android:padding="16dp"
+    android:layout_margin="12dp"
+    android:background="@drawable/item_background"
+    android:elevation="8dp"
+    android:clipToPadding="false"
+    android:layout_gravity="center">
 
+    <!-- Book Image -->
     <ImageView
         android:id="@+id/item_image"
-        android:layout_width="400dp"
+        android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:scaleType="center"
+        android:scaleType="centerCrop"
         android:layout_gravity="center"
         android:src="@drawable/maths" />
 
+    <!-- Book Details and Price -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp"
+        android:gravity="center">
 
-    <TextView
-        android:id="@+id/item_details"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="8dp"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <!-- Item Details -->
+        <TextView
+            android:id="@+id/item_details"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="start"
+            android:padding="8dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
 
+        <!-- Item Price -->
         <TextView
             android:id="@+id/item_price"
-            android:layout_width="140dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:layout_weight="1"
+            android:gravity="end"
             android:padding="8dp"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
 
     </LinearLayout>
-
-
-
 </LinearLayout>

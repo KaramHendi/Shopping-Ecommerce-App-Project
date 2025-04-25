@@ -5,6 +5,7 @@ public class DeliverOrder {
 
     public DeliverOrder() {}
 
+    // Constructor accepting a String for price
     public DeliverOrder(String name, String phone, String id, String address, String orderDetails, String deliveryStaffName, String price) {
         this.name = name;
         this.phone = phone;

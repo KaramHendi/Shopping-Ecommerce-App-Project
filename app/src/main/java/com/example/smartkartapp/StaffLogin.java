@@ -60,12 +60,14 @@ public class StaffLogin extends AppCompatActivity {
                             String dpn = staffReg.getStaffname();
                             String dpa = staffReg.getPassword();
 
-                            if (dpn != null && dpa != null &&
-                                    dpn.equals(sna) && dpa.equals(spa)) {
-                                success = true;
-                                stfstatus.setText("Login successful. Checking delivery status...");
-                                handleStaffLogin(dpn, dpa);
-                                break;
+                            // Check for null values before using equals
+                            if (dpn != null && dpa != null) {
+                                if (dpn.equals(sna) && dpa.equals(spa)) {
+                                    success = true;
+                                    stfstatus.setText("Login successful. Checking delivery status...");
+                                    handleStaffLogin(dpn, dpa);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -74,6 +76,7 @@ public class StaffLogin extends AppCompatActivity {
                         stfstatus.setText("Staff not found or password incorrect.");
                     }
                 }
+
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
