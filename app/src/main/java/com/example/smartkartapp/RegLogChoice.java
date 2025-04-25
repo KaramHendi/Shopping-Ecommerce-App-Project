@@ -136,9 +136,7 @@ public class RegLogChoice extends AppCompatActivity {
             continueBtn.setVisibility(View.VISIBLE);
         }
     }
-
-    @Override
     public void onBackPressed() {
-        super.onBackPressed();  // Allow back button functionality
-    }
 }
+
+    }
