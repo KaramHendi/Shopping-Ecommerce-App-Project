@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,100 +9,72 @@
     android:background="@drawable/appbackground"
     tools:context=".CurrentOrderStatus">
 
-    <!-- Logo Image at the top -->
+    <!-- Logo -->
     <ImageView
         android:id="@+id/logo"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:layout_centerHorizontal="true"
         android:src="@drawable/applogo_"
-    android:contentDescription="App Logo"
-    android:layout_marginBottom="24dp"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"/>
+        android:contentDescription="App Logo"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Top Message -->
+    <TextView
+        android:id="@+id/tvItemPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Loading deliveries..."
+        android:textSize="18sp"
+        android:textColor="#333333"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/logo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Orders Container -->
     <LinearLayout
         android:id="@+id/orderDetailsLayout"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/logo"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:paddingTop="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvItemPrice"
+        app:layout_constraintBottom_toTopOf="@+id/confirmDelivery"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Title -->
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Order Details"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="#212121"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Order Info -->
+        <!-- Dynamically populated Order Details -->
         <TextView
             android:id="@+id/tv1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Order ID: "
-            android:textSize="18sp"
-            android:textColor="#333"
-            android:layout_marginBottom="12dp" />
-
-        <TextView
-            android:id="@+id/tv2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Name: "
-            android:textSize="18sp"
-            android:textColor="#333"
-            android:layout_marginBottom="12dp" />
-
-        <TextView
-            android:id="@+id/tv3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Phone: "
-            android:textSize="18sp"
-            android:textColor="#333"
-            android:layout_marginBottom="12dp" />
-
-        <TextView
-            android:id="@+id/tv4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Address: "
-            android:textSize="18sp"
-            android:textColor="#333"
-            android:layout_marginBottom="12dp" />
-
-        <TextView
-            android:id="@+id/tvItemPrice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Total Price: "
-            android:textSize="18sp"
-            android:textColor="#333"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Confirm Button -->
-        <Button
-            android:id="@+id/confirmDelivery"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Confirm Customer's Acceptance"
-            android:textAllCaps="false"
+            android:layout_height="match_parent"
+            android:text="Order Details will be here"
+            android:textColor="#444"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:backgroundTint="#4CAF50"
-            android:textColor="@android:color/white"
-            android:padding="16dp" />
+            android:padding="8dp"
+            android:background="@android:color/white"
+            android:layout_marginBottom="8dp" />
     </LinearLayout>
 
+    <!-- Confirm Delivery Button -->
+    <Button
+        android:id="@+id/confirmDelivery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Confirm Customer's Acceptance"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:backgroundTint="#4CAF50"
+        android:textColor="@android:color/white"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

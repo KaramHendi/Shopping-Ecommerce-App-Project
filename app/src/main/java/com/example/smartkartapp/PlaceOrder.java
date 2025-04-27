@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -20,11 +21,14 @@ public class PlaceOrder extends AppCompatActivity {
     EditText addr;
     Button plord;
 
+    DatabaseReference databaseReference;
     static DatabaseReference databaseOrders;
     static DatabaseReference databaseStocks;
+    FirebaseAuth auth;
 
     String custName, custPhone, custPass, itemDetails;
     int itemPrice;
+    String uid;
 
     public static void getOrder() {
         databaseOrders = FirebaseDatabase.getInstance().getReference("orders");
@@ -35,7 +39,7 @@ public class PlaceOrder extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_order);
 
-        // UI elements initialization
+        // UI elements
         cname = findViewById(R.id.custname);
         cphone = findViewById(R.id.custphone);
         ordspec = findViewById(R.id.itemdet);
@@ -44,27 +48,64 @@ public class PlaceOrder extends AppCompatActivity {
         ordError = findViewById(R.id.ordError);
         plord = findViewById(R.id.btnplord);
 
-        // Clear previous error messages
-        ordError.setText("");
+        // Firebase initialization
+        auth = FirebaseAuth.getInstance();
+        uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
 
-        // Retrieve data passed through the Intent
-        custName = getIntent().getStringExtra("CUSTNAME");
-        custPhone = getIntent().getStringExtra("CUSTPH");
+        if (uid == null) {
+            showToast("User not found.");
+            finish();
+            return;
+        }
+
+        // Get intent data
         custPass = getIntent().getStringExtra("CUSTPASS");
         itemDetails = getIntent().getStringExtra("ITEMDET");
         itemPrice = getIntent().getIntExtra("item_price", 0);
 
-        // Set UI with received data
-        cname.setText(custName);
-        cphone.setText(custPhone);
         ordspec.setText(itemDetails);
         ordprice.setText(String.valueOf(itemPrice));
 
-        // Firebase database references
         databaseOrders = FirebaseDatabase.getInstance().getReference("orders");
         databaseStocks = FirebaseDatabase.getInstance().getReference("stocks");
 
-        // Button click to place the order
+        // Initially disable place order button
+        plord.setEnabled(false);
+
+        // Fetch current user details
+        databaseReference = FirebaseDatabase.getInstance().getReference("users").child(uid);
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                MemberReg user = snapshot.getValue(MemberReg.class);
+                if (user != null) {
+                    // Log fetched user data for debugging
+                    Log.d("PlaceOrder", "User name: " + user.getName() + ", phone: " + user.getPhone());
+
+                    custName = user.getName() != null ? user.getName() : "N/A";  // Ensure a fallback value for custName
+                    custPhone = user.getPhone();
+
+                    // Log the customer details
+                    Log.d("PlaceOrder", "Customer Name: " + custName + ", Customer Phone: " + custPhone);
+
+                    cname.setText(custName);  // Set name in TextView
+                    cphone.setText(custPhone); // Set phone in TextView
+
+                    plord.setEnabled(true);  // Enable the "Place Order" button
+                } else {
+                    showToast("Failed to load user data.");
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                showToast("Failed to load user data.");
+                finish();
+            }
+        });
+
+        // Place order
         plord.setOnClickListener(v -> {
             String address = addr.getText().toString().trim();
             if (TextUtils.isEmpty(address)) {
@@ -72,57 +113,81 @@ public class PlaceOrder extends AppCompatActivity {
                 return;
             }
 
-            // Check stock and place order
-            databaseStocks.addListenerForSingleValueEvent(new ValueEventListener() {
+            // Fetch user details fresh before placing order
+            databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    boolean itemFound = false;
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    MemberReg user = snapshot.getValue(MemberReg.class);
+                    if (user != null) {
+                        custName = user.getName() != null ? user.getName() : "N/A";  // Ensure a fallback value for custName
+                        custPhone = user.getPhone();
 
-                    for (DataSnapshot stockSnapshot : dataSnapshot.getChildren()) {
-                        StockReg stockReg = stockSnapshot.getValue(StockReg.class);
+                        // Fetch item stock details
+                        databaseStocks.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                boolean itemFound = false;
 
-                        if (stockReg != null && stockReg.getItemName().equalsIgnoreCase(itemDetails)) {
-                            itemFound = true;
-                            int currentStock = stockReg.getCurrentStockAvailaible();
+                                for (DataSnapshot stockSnapshot : dataSnapshot.getChildren()) {
+                                    StockReg stockReg = stockSnapshot.getValue(StockReg.class);
 
-                            if (currentStock > 0) {
-                                currentStock--;
-                                // Update stock availability in the database
-                                databaseStocks.child(stockReg.getId()).child("currentStockAvailaible").setValue(currentStock);
+                                    if (stockReg != null && stockReg.getItemName().equalsIgnoreCase(itemDetails)) {
+                                        itemFound = true;
+                                        int currentStock = stockReg.getCurrentStockAvailaible();
 
-                                // Create a new order
-                                String orderId = databaseOrders.push().getKey();
-                                Orders order = new Orders(orderId, itemDetails, custName, custPhone, address, custPass, itemPrice, "pending");
+                                        if (currentStock > 0) {
+                                            currentStock--;  // Update stock count
 
-                                // Save the order in the "orders" node
-                                databaseOrders.child(orderId).setValue(order).addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        // Save order under userOrders as well
-                                        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                                        FirebaseDatabase.getInstance().getReference("userOrders")
-                                                .child(uid).child(orderId).setValue(order);
+                                            databaseStocks.child(stockReg.getId())
+                                                    .child("currentStockAvailaible")
+                                                    .setValue(currentStock);
 
-                                        showToast("Order placed successfully!");
-                                        goToHome();
-                                    } else {
-                                        showToast("Failed to place order. Please try again later.");
+                                            // Place the order in database
+                                            String orderId = databaseOrders.push().getKey();
+                                            if (orderId != null) {
+                                                Orders order = new Orders(orderId, itemDetails, custName, custPhone, address, custPass, itemPrice, "pending");
+
+                                                databaseOrders.child(orderId).setValue(order)
+                                                        .addOnCompleteListener(task -> {
+                                                            if (task.isSuccessful()) {
+                                                                FirebaseDatabase.getInstance().getReference("userOrders")
+                                                                        .child(uid).child(orderId).setValue(order);
+
+                                                                showToast("Order placed successfully!");
+                                                                goToHome();
+                                                            } else {
+                                                                showToast("Failed to place order.");
+                                                            }
+                                                        });
+                                            } else {
+                                                showToast("Failed to generate order ID.");
+                                            }
+                                        } else {
+                                            showToast("Item is out of stock!");
+                                        }
+                                        break;
                                     }
-                                });
-                            } else {
-                                showToast("Item is out of stock!");
-                            }
-                            break;
-                        }
-                    }
+                                }
 
-                    if (!itemFound) {
-                        showToast("Item not found in stock!");
+                                if (!itemFound) {
+                                    showToast("Item not found in stock!");
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                showToast("Database error: " + databaseError.getMessage());
+                            }
+                        });
+
+                    } else {
+                        showToast("Failed to load user data.");
                     }
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                    showToast("Database error: " + databaseError.getMessage());
+                public void onCancelled(@NonNull DatabaseError error) {
+                    showToast("Failed to load user data.");
                 }
             });
         });
@@ -133,27 +198,11 @@ public class PlaceOrder extends AppCompatActivity {
     }
 
     private void goToHome() {
-        // Redirect to the Home Page Activity after successful order placement
         Intent intent = new Intent(PlaceOrder.this, HomePageActivity.class);
         intent.putExtra("NAME", custName);
         intent.putExtra("PHONE", custPhone);
         intent.putExtra("PASSWORD", custPass);
         intent.putExtra("CALLINGACTIVITY", "PlaceOrder");
-        startActivity(intent);
-        finish();
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Handle back press, ensuring the user can navigate back to the previous screen with the right data
-        Intent intent = new Intent(PlaceOrder.this, DisplayItem.class);
-        intent.putExtra("NAME", custName);
-        intent.putExtra("PHONE", custPhone);
-        intent.putExtra("PASSWORD", custPass);
-        intent.putExtra("CALLING_ACTIVITY", getIntent().getStringExtra("CALLING_ACTIVITY"));
-        intent.putExtra("image_id", getIntent().getIntExtra("image_id", 0));
-        intent.putExtra("item_details", itemDetails);
-        intent.putExtra("item_price", itemPrice);
         startActivity(intent);
         finish();
     }

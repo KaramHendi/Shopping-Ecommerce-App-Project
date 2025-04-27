@@ -155,7 +155,12 @@ public class HomePageActivity extends AppCompatActivity
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
-            startActivity(new Intent(HomePageActivity.this, RegLogChoice.class));
+            Intent i = new Intent(this, RegLogChoice.class);
+            i.putExtra("USER_ROLE", userRole);
+            i.putExtra("USER_PHONE", userPhone);
+            i.putExtra("USER_NAME", userName);
+            i.putExtra("USER_ID", userId);
+            startActivity(i);
             finish();
         }
     }

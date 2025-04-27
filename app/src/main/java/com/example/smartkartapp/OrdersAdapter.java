@@ -1,20 +1,19 @@
 package com.example.smartkartapp;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.List;
 
 public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewHolder> {
@@ -55,23 +54,38 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
 
         // Delete Order button
         holder.removeOrderBtn.setOnClickListener(v -> {
-            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            String orderId = order.getId();
-
-            DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-            rootRef.child("userOrders").child(userId).child(orderId).removeValue();
-            rootRef.child("orders").child(orderId).removeValue();
-            rootRef.child("deliverorder").child(orderId).removeValue(); // <- also remove from deliverorder
-
-            orderList.remove(position);
-            notifyItemRemoved(position);
-            notifyItemRangeChanged(position, orderList.size());
+            showConfirmationDialog(order, position);
         });
     }
 
     @Override
     public int getItemCount() {
         return orderList.size();
+    }
+
+    private void showConfirmationDialog(Orders order, int position) {
+        new AlertDialog.Builder(context)
+                .setTitle("Delete Order")
+                .setMessage("Are you sure you want to remove this order?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    deleteOrder(order, position);
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void deleteOrder(Orders order, int position) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String orderId = order.getId();
+
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        rootRef.child("userOrders").child(userId).child(orderId).removeValue();
+        rootRef.child("orders").child(orderId).removeValue();
+        rootRef.child("deliverorder").child(orderId).removeValue(); // <- also remove from deliverorder
+
+        orderList.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, orderList.size());
     }
 
     public static class OrderViewHolder extends RecyclerView.ViewHolder {

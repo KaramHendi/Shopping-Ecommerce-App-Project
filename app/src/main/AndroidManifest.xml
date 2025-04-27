@@ -1,7 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.smartkartapp">
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -24,7 +23,8 @@
         <activity android:name=".RegisterPage" />
         <activity android:name=".LoginPage" />
         <activity android:name=".RegLogChoice" />
-        <activity android:name=".AdminLogin" />
+        <activity android:name=".AdminLogin"
+            android:theme="@style/SendMessageTheme"/>
         <activity android:name=".StaffLogin" />
 
         <!-- Home & Role-based Dashboards -->
@@ -37,7 +37,6 @@
         <activity
             android:name=".StaffHomePage"
             android:theme="@style/SendMessageTheme" />
-
 
         <!-- Order Management -->
         <activity android:name=".PlaceOrder" />
@@ -65,11 +64,10 @@
             android:name=".SendMessageActivity"
             android:theme="@style/SendMessageTheme" />
 
-
         <!-- Extra Pages -->
         <activity android:name=".ProfileActivity" />
         <activity android:name=".About" />
-        <activity android:name=".ViewMessagesActivity" /> <!-- ✅ Newly added -->
+        <activity android:name=".ViewMessagesActivity" />
 
     </application>
 

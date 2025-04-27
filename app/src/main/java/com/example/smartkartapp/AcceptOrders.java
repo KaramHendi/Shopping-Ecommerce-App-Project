@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,7 +19,7 @@ public class AcceptOrders extends AppCompatActivity {
     TextView tv1, tv2, tv3, tv4, tvtopmsg;
     static DatabaseReference databaseOngoingDelivery;
 
-    String[] orderKeys = new String[4];  // To track original order keys
+    String[] orderKeys = new String[4];
 
     public static void getDelivery() {
         databaseOngoingDelivery = FirebaseDatabase.getInstance().getReference("deliverOrder");
@@ -40,41 +39,46 @@ public class AcceptOrders extends AppCompatActivity {
         final String staffname = getIntent().getStringExtra("STAFFNAME");
         final String staffpassword = getIntent().getStringExtra("STAFFPASSWORD");
 
-        databaseOngoingDelivery = FirebaseDatabase.getInstance().getReference("deliverOrder");
+        if (staffname == null || staffpassword == null) {
+            Toast.makeText(this, "Staff information missing", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
+        databaseOngoingDelivery = FirebaseDatabase.getInstance().getReference("deliverOrder");
         PlaceOrder.getOrder();
 
         PlaceOrder.databaseOrders.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int i = 0;
+                clearAllTextViews();
+
                 for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
                     if (i >= 4) break;
 
                     Orders orders = orderSnapshot.getValue(Orders.class);
-                    assert orders != null;
-                    String name = orders.getCustname();
-                    String phone = orders.getCustphone();
-                    String address = orders.getCustaddr();
-                    String specs = orders.getSpec();
-                    int price = orders.getPrice();
-                    String details = "NAME:" + name + "\nPHONE:" + phone + "\nADDRESS:" + address + "\nORDER DETAILS:" + specs + "\nPRICE:" + price;
+                    if (orders == null) continue;
 
-                    orderKeys[i] = orderSnapshot.getKey(); // Track the original order key
+                    String name = orders.getCustname() != null ? orders.getCustname() : "N/A";
+                    String phone = orders.getCustphone() != null ? orders.getCustphone() : "N/A";
+                    String address = orders.getCustaddr() != null ? orders.getCustaddr() : "N/A";
+                    String specs = orders.getSpec() != null ? orders.getSpec() : "N/A";
+                    String priceStr = orders.getPrice() != 0 ? String.valueOf(orders.getPrice()) : "N/A";
+
+                    String details = "NAME: " + name +
+                            "\nPHONE: " + phone +
+                            "\nADDRESS: " + address +
+                            "\nORDER DETAILS: " + specs +
+                            "\nPRICE: " + priceStr;
+
+                    orderKeys[i] = orderSnapshot.getKey();
 
                     switch (i) {
-                        case 0:
-                            tv1.setText(details);
-                            break;
-                        case 1:
-                            tv2.setText(details);
-                            break;
-                        case 2:
-                            tv3.setText(details);
-                            break;
-                        case 3:
-                            tv4.setText(details);
-                            break;
+                        case 0: tv1.setText(details); break;
+                        case 1: tv2.setText(details); break;
+                        case 2: tv3.setText(details); break;
+                        case 3: tv4.setText(details); break;
                     }
                     i++;
                 }
@@ -82,7 +86,6 @@ public class AcceptOrders extends AppCompatActivity {
                 if (i > 0) {
                     tvtopmsg.setText("Tap on an order to start its delivery");
                 } else {
-                    tv1.setText("");
                     tvtopmsg.setText("There are no ongoing orders");
                 }
 
@@ -96,6 +99,13 @@ public class AcceptOrders extends AppCompatActivity {
         });
     }
 
+    private void clearAllTextViews() {
+        tv1.setText("");
+        tv2.setText("");
+        tv3.setText("");
+        tv4.setText("");
+    }
+
     private void setupOrderClickListeners(final String staffname, final String staffpassword) {
         tv1.setOnClickListener(v -> handleOrderClick(tv1.getText().toString(), staffname, staffpassword, 0));
         tv2.setOnClickListener(v -> handleOrderClick(tv2.getText().toString(), staffname, staffpassword, 1));
@@ -104,7 +114,7 @@ public class AcceptOrders extends AppCompatActivity {
     }
 
     private void handleOrderClick(String details, String staffname, String staffpassword, int index) {
-        if (!details.equals("")) {
+        if (!details.isEmpty() && orderKeys[index] != null) {
             addOrderToDeliver(details, staffname, staffpassword, orderKeys[index]);
         }
     }
@@ -121,26 +131,32 @@ public class AcceptOrders extends AppCompatActivity {
         String address = lines[2].replace("ADDRESS:", "").trim();
         String specs = lines[3].replace("ORDER DETAILS:", "").trim();
         String price = lines[4].replace("PRICE:", "").trim();
+
         String id = databaseOngoingDelivery.push().getKey();
-
-        DeliverOrder deliverOrder = new DeliverOrder(name, phone, id, address, specs, staffname, price);
-        if (id != null) {
-            databaseOngoingDelivery.child(id).setValue(deliverOrder);
-
-            // ✅ Remove the original order from "orders"
-            PlaceOrder.databaseOrders.child(orderKey).removeValue();
-
-            Toast.makeText(this, "Order moved to your delivery list", Toast.LENGTH_SHORT).show();
+        if (id == null) {
+            Toast.makeText(this, "Failed to generate delivery ID", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        Intent i = new Intent(AcceptOrders.this, CurrentOrderStatus.class);
-        i.putExtra("STAFFNAME", staffname);
-        i.putExtra("STAFFPASSWORD", staffpassword);
-        startActivity(i);
+        DeliverOrder deliverOrder = new DeliverOrder(name, phone, id, address, specs, staffname, price);
+
+        databaseOngoingDelivery.child(id).setValue(deliverOrder)
+                .addOnSuccessListener(unused -> {
+                    PlaceOrder.databaseOrders.child(orderKey).removeValue();
+                    Toast.makeText(this, "Order moved to your delivery list", Toast.LENGTH_SHORT).show();
+
+                    Intent i = new Intent(AcceptOrders.this, CurrentOrderStatus.class);
+                    i.putExtra("STAFFNAME", staffname);
+                    i.putExtra("STAFFPASSWORD", staffpassword);
+                    startActivity(i);
+                    finish();
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Failed to move order to delivery", Toast.LENGTH_SHORT).show());
     }
 
     @Override
     public void onBackPressed() {
         startActivity(new Intent(AcceptOrders.this, StaffHomePage.class));
+        finish();
     }
 }

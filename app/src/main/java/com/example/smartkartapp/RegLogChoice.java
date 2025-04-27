@@ -62,6 +62,7 @@ public class RegLogChoice extends AppCompatActivity {
         stflog.setOnClickListener(v -> startActivity(new Intent(this, StaffLogin.class)));
         about.setOnClickListener(v -> startActivity(new Intent(this, About.class)));
 
+
         // Continue to home page with role and phone
         continueBtn.setOnClickListener(v -> {
             if (!userRole.isEmpty() && !userPhone.isEmpty()) {
