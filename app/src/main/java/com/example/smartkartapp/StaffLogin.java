@@ -57,7 +57,7 @@ public class StaffLogin extends AppCompatActivity {
                     for (DataSnapshot staffSnapshot : dataSnapshot.getChildren()) {
                         StaffReg staffReg = staffSnapshot.getValue(StaffReg.class);
                         if (staffReg != null) {
-                            String dpn = staffReg.getName();
+                            String dpn = staffReg.getStaffname();
                             String dpa = staffReg.getPassword();
 
                             // Check for null values before using equals
@@ -130,3 +130,4 @@ public class StaffLogin extends AppCompatActivity {
         finish();
     }
 }
+
